@@ -130,8 +130,8 @@ flags.DEFINE_integer('gpu_g', 0,
                      'GPU id for graphics, e.g. Gibson.')
 flags.DEFINE_boolean('random_position', False,
                      'Whether to randomize initial and target position')
-flags.DEFINE_boolean('random_obstacles', False,
-                     'Whether to add random obstacles')
+flags.DEFINE_boolean('fixed_obstacles', False,
+                     'Whether to add fixed obstacles')
 
 FLAGS = flags.FLAGS
 
@@ -558,7 +558,7 @@ def main(_):
             physics_timestep=FLAGS.physics_timestep,
             device_idx=device_idx,
             random_position=FLAGS.random_position,
-            random_obstacles=FLAGS.random_obstacles,
+            fixed_obstacles=FLAGS.fixed_obstacles,
             random_height=False,
         ),
         model_ids=FLAGS.model_ids,
