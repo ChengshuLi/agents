@@ -548,6 +548,7 @@ def main(_):
     train_eval(
         root_dir=FLAGS.root_dir,
         gpu=FLAGS.gpu_g,
+        eval_deterministic=FLAGS.eval_deterministic,
         env_load_fn=lambda model_id, mode, device_idx: suite_gibson.load(
             config_file=FLAGS.config_file,
             model_id=model_id,
