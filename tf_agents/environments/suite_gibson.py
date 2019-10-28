@@ -32,7 +32,7 @@ def load(config_file,
          physics_timestep=1.0 / 40.0,
          device_idx=0,
          random_position=False,
-         random_obstacles=False,         
+         fixed_obstacles=False,         
          random_height=False,
          gym_env_wrappers=(),
          env_wrappers=(),
@@ -46,7 +46,7 @@ def load(config_file,
                                     physics_timestep=physics_timestep,
                                     device_idx=device_idx,
                                     random_height=random_height)
-        elif random_obstacles:
+        elif fixed_obstacles:
             env = NavigateObstaclesEnv(config_file=config_file,
                                     mode=env_mode,
                                     action_timestep=action_timestep,

@@ -158,6 +158,7 @@ def train_eval(
         model_ids=None,
         eval_env_mode='headless',
         num_iterations=1000000,
+        goal_fc_layers=[256],
         conv_layer_params=None,
         encoder_fc_layers=[256],
         actor_fc_layers=[256, 256],
@@ -266,8 +267,14 @@ def train_eval(
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
+            # 'scan': tf.keras.Sequential(mlp_layers(
+            #     conv_layer_params=None,
+            #     fc_layer_params=encoder_fc_layers,
+            #     kernel_initializer=glorot_uniform_initializer,
+            # )),            
         }
         preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
+        #preprocessing_combiner = None
 
         actor_net = actor_distribution_network.ActorDistributionNetwork(
             observation_spec,
@@ -529,6 +536,7 @@ def main(_):
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.gpu_c)
 
+    goal_fc_layers = [256]
     conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
     encoder_fc_layers = [256]
     actor_fc_layers = [256]
@@ -548,7 +556,6 @@ def main(_):
     train_eval(
         root_dir=FLAGS.root_dir,
         gpu=FLAGS.gpu_g,
-        eval_deterministic=FLAGS.eval_deterministic,
         env_load_fn=lambda model_id, mode, device_idx: suite_gibson.load(
             config_file=FLAGS.config_file,
             model_id=model_id,
