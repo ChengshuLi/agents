@@ -159,28 +159,27 @@ def train_eval(
         env_load_fn=None,
         model_ids=None,
         eval_env_mode='headless',
-        num_iterations=500000,
-        goal_fc_layers=[256],
+        num_iterations=1000000,
         conv_layer_params=None,
-        encoder_fc_layers=[256, 128, 64, 32],
-        actor_fc_layers=[256, 256, 256],
+        encoder_fc_layers=[256, 128, 64],
+        actor_fc_layers=[256, 256],
         critic_obs_fc_layers=None,
-        critic_action_fc_layers=[256],
-        critic_joint_fc_layers=[256, 256, 256],
+        critic_action_fc_layers=None,
+        critic_joint_fc_layers=[256, 256],
         # Params for collect
-        initial_collect_steps=100,
+        initial_collect_steps=10000,
         collect_steps_per_iteration=1,
         num_parallel_environments=1,
-        replay_buffer_capacity=50000,
+        replay_buffer_capacity=100000,
         # Params for target update
-        target_update_tau=0.0005,
+        target_update_tau=0.005,
         target_update_period=1,
         # Params for train
         train_steps_per_iteration=1,
-        batch_size=64,
-        actor_learning_rate=1e-3,
-        critic_learning_rate=1e-3,
-        alpha_learning_rate=1e-3,
+        batch_size=256,
+        actor_learning_rate=3e-4,
+        critic_learning_rate=3e-4,
+        alpha_learning_rate=3e-4,
         td_errors_loss_fn=tf.compat.v1.losses.mean_squared_error,
         gamma=0.99,
         reward_scale_factor=1.0,
@@ -259,21 +258,21 @@ def train_eval(
 
         glorot_uniform_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
         preprocessing_layers = {
-#             'depth': tf.keras.Sequential(mlp_layers(
-#                 conv_layer_params=conv_layer_params,
-#                 fc_layer_params=encoder_fc_layers,
-#                 kernel_initializer=glorot_uniform_initializer,
-#             )),
+             'depth': tf.keras.Sequential(mlp_layers(
+                 conv_layer_params=conv_layer_params,
+                 fc_layer_params=encoder_fc_layers,
+                 kernel_initializer=glorot_uniform_initializer,
+             )),
             'sensor': tf.keras.Sequential(mlp_layers(
                 conv_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
-            'pedestrian': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=None,
-                fc_layer_params=encoder_fc_layers,
-                kernel_initializer=glorot_uniform_initializer,
-            )),
+            # 'pedestrian': tf.keras.Sequential(mlp_layers(
+            #     conv_layer_params=None,
+            #     fc_layer_params=encoder_fc_layers,
+            #     kernel_initializer=glorot_uniform_initializer,
+            # )),
             # 'scan': tf.keras.Sequential(mlp_layers(
             #     conv_layer_params=None,
             #     fc_layer_params=encoder_fc_layers,
@@ -543,13 +542,13 @@ def main(_):
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.gpu_c)
 
-    goal_fc_layers = [256]
+    #goal_fc_layers = [256]
     conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
-    encoder_fc_layers = [256, 128, 64, 32]
-    actor_fc_layers = [256, 256, 256]
-    critic_obs_fc_layers = [256, 256, 256]
-    critic_action_fc_layers = [256, 256, 256]
-    critic_joint_fc_layers = [256, 256, 256]
+    encoder_fc_layers = [256, 128, 64]
+    actor_fc_layers = [256]
+    critic_obs_fc_layers = [256]
+    critic_action_fc_layers = [256]
+    critic_joint_fc_layers = [256]    
 
     for k, v in FLAGS.flag_values_dict().items():
         print(k, v)
