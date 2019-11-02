@@ -163,7 +163,7 @@ def train_eval(
         eval_env_mode='headless',
         num_iterations=1000000,
         conv_layer_params=None,
-        encoder_fc_layers=[256, 128, 64],
+        encoder_fc_layers=[256],
         actor_fc_layers=[256, 256],
         critic_obs_fc_layers=None,
         critic_action_fc_layers=None,
@@ -546,7 +546,7 @@ def main(_):
 
     #goal_fc_layers = [256]
     conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
-    encoder_fc_layers = [256, 128, 64]
+    encoder_fc_layers = [256]
     actor_fc_layers = [256]
     critic_obs_fc_layers = [256]
     critic_action_fc_layers = [256]
