@@ -132,6 +132,8 @@ flags.DEFINE_boolean('random_position', False,
                      'Whether to randomize initial and target position')
 flags.DEFINE_boolean('fixed_obstacles', False,
                      'Whether to use the fixed obstacles environment')
+flags.DEFINE_boolean('random_obstacles', False,
+                     'Whether to use the random obstacles environment')
 flags.DEFINE_boolean('pedestrians', False,
                      'Whether to use the pedestrians environment')
 
@@ -574,6 +576,7 @@ def main(_):
             random_position=FLAGS.random_position,
             fixed_obstacles=FLAGS.fixed_obstacles,
             pedestrians=FLAGS.pedestrians,
+            random_obstacles=FLAGS.random_obstacles,
             random_height=False,
         ),
         model_ids=FLAGS.model_ids,
