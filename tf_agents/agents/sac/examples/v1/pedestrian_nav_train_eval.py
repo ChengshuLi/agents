@@ -132,6 +132,8 @@ flags.DEFINE_boolean('random_position', False,
                      'Whether to randomize initial and target position')
 flags.DEFINE_boolean('fixed_obstacles', False,
                      'Whether to use the fixed obstacles environment')
+flags.DEFINE_boolean('random_obstacles', False,
+                     'Whether to use the random obstacles environment')
 flags.DEFINE_boolean('pedestrians', False,
                      'Whether to use the pedestrians environment')
 
@@ -269,11 +271,11 @@ def train_eval(
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
-            'pedestrian': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=None,
-                fc_layer_params=encoder_fc_layers,
-                kernel_initializer=glorot_uniform_initializer,
-            )),
+#             'pedestrian': tf.keras.Sequential(mlp_layers(
+#                 conv_layer_params=None,
+#                 fc_layer_params=encoder_fc_layers,
+#                 kernel_initializer=glorot_uniform_initializer,
+#             )),
             # 'scan': tf.keras.Sequential(mlp_layers(
             #     conv_layer_params=None,
             #     fc_layer_params=encoder_fc_layers,
@@ -575,6 +577,7 @@ def main(_):
             random_position=FLAGS.random_position,
             fixed_obstacles=FLAGS.fixed_obstacles,
             pedestrians=FLAGS.pedestrians,
+            random_obstacles=FLAGS.random_obstacles,
             random_height=False,
         ),
         model_ids=FLAGS.model_ids,
