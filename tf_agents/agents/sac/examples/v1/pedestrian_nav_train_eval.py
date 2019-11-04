@@ -131,6 +131,8 @@ flags.DEFINE_boolean('random_position', False,
                      'Whether to randomize initial and target position')
 flags.DEFINE_boolean('fixed_obstacles', False,
                      'Whether to use the fixed obstacles environment')
+flags.DEFINE_boolean('random_obstacles', False,
+                     'Whether to use the random obstacles environment')
 flags.DEFINE_boolean('pedestrians', False,
                      'Whether to use the pedestrians environment')
 flags.DEFINE_boolean('random_obstacles', False,
@@ -162,7 +164,7 @@ def train_eval(
         eval_env_mode='headless',
         num_iterations=1000000,
         conv_layer_params=None,
-        encoder_fc_layers=[256, 128, 64],
+        encoder_fc_layers=[256],
         actor_fc_layers=[256, 256],
         critic_obs_fc_layers=None,
         critic_action_fc_layers=None,
@@ -545,7 +547,7 @@ def main(_):
 
     #goal_fc_layers = [256]
     conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
-    encoder_fc_layers = [256, 128, 64]
+    encoder_fc_layers = [256]
     actor_fc_layers = [256]
     critic_obs_fc_layers = [256]
     critic_action_fc_layers = [256]
@@ -576,6 +578,7 @@ def main(_):
             fixed_obstacles=FLAGS.fixed_obstacles,
             random_obstacles=FLAGS.random_obstacles,
             pedestrians=FLAGS.pedestrians,
+            random_obstacles=FLAGS.random_obstacles,
             random_height=False,
         ),
         model_ids=FLAGS.model_ids,
