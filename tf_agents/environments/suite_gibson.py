@@ -18,8 +18,7 @@ import gin
 
 from tf_agents.environments import gym_wrapper
 from tf_agents.environments import wrappers
-from gibson2.envs.locomotor_env_aha import NavigateRandomObstaclesEnv
-from gibson2.envs.locomotor_env import NavigateEnv, NavigateRandomEnv, NavigateObstaclesEnv, NavigatePedestriansEnv
+from gibson2.envs.locomotor_env import NavigateEnv, NavigateRandomEnv, NavigateObstaclesEnv, NavigateRandomObstaclesEnv, NavigatePedestriansEnv
 import gibson2
 
 
