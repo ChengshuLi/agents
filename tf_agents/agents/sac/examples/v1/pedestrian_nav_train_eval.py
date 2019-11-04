@@ -135,8 +135,6 @@ flags.DEFINE_boolean('random_obstacles', False,
                      'Whether to use the random obstacles environment')
 flags.DEFINE_boolean('pedestrians', False,
                      'Whether to use the pedestrians environment')
-flags.DEFINE_boolean('random_obstacles', False,
-                     'Whether to add random obstacles')
 
 FLAGS = flags.FLAGS
 
@@ -576,7 +574,6 @@ def main(_):
             device_idx=device_idx,
             random_position=FLAGS.random_position,
             fixed_obstacles=FLAGS.fixed_obstacles,
-            random_obstacles=FLAGS.random_obstacles,
             pedestrians=FLAGS.pedestrians,
             random_obstacles=FLAGS.random_obstacles,
             random_height=False,
