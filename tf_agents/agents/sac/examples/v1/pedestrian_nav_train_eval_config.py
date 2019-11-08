@@ -39,6 +39,7 @@ from absl import logging
 import gin
 import yaml
 import tensorflow as tf
+import gibson2 
 
 from tf_agents.agents.ddpg import critic_network
 from tf_agents.agents.sac import sac_agent
@@ -85,7 +86,7 @@ flags.DEFINE_integer('train_steps_per_iteration', 1,
 flags.DEFINE_integer('batch_size', 64,
                      'Batch size for each training step. '
                      'For each training iteration, we first collect collect_steps_per_iteration steps to the '
-                     'replay buffer. Then we sample batch_size steps from the replay buffer and train the model'
+             'replay buffer. Then we sample batch_size steps from the replay buffer and train the model'
                      'for train_steps_per_iteration times.')
 flags.DEFINE_float('gamma', 0.99,
                    'Discount_factor for the environment')
@@ -543,8 +544,6 @@ def train_eval(
 def main(_):
     tf.compat.v1.enable_resource_variables()
     logging.set_verbosity(logging.INFO)
-    print('GIN FILE: {}, GIN PARAMS: {}'.format(FLAGS.gin_file, FLAGS.gin_param))
-    # gin.external_configurable(suite_gibson.load)
     gin.parse_config_files_and_bindings(FLAGS.gin_file, FLAGS.gin_param)
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.gpu_c)
@@ -565,7 +564,12 @@ def main(_):
     print('critic_obs_fc_layers', critic_obs_fc_layers)
     print('critic_action_fc_layers', critic_action_fc_layers)
     print('critic_joint_fc_layers', critic_joint_fc_layers)
-    
+   
+    # Convert config_file to absolute path.
+    gibson_path = os.path.dirname(gibson2.__file__).split('/')
+    config_path = FLAGS.config_file.strip('./').split('/')
+    abs_config_file = '/'.join(gibson_path[:-1] + config_path)
+    print('CONFIG FILE: {}'.format(abs_config_file))
     # In train mode, save parameters to config file
     if not FLAGS.eval_only and not FLAGS.train_load_yaml:
         print('TRAIN MODE --> WRITE TO YAML FILE')
@@ -573,7 +577,7 @@ def main(_):
         # Environment setting.
         'root_dir': FLAGS.root_dir,
         'gpu_g': FLAGS.gpu_g,
-        'config_file': FLAGS.config_file,
+        'config_file': abs_config_file,
         'env_type': FLAGS.env_type,
         'action_timestep': FLAGS.action_timestep,
         'physics_timestep': FLAGS.physics_timestep,
@@ -605,7 +609,17 @@ def main(_):
         'critic_obs_fc_layers': critic_obs_fc_layers,
         'critic_action_fc_layers': critic_action_fc_layers,
         'critic_joint_fc_layers': critic_joint_fc_layers
-      }  
+      } 
+        # Load environment .yaml.
+        env_config = config_dict.get('config_file')
+        print('ENVIRONMENT YAML: {}'.format(env_config))
+        with open(env_config, 'r') as env_configfile:
+            env_dict = yaml.load(env_configfile)
+            print('*' * 100)
+            for k, v in env_dict.items():
+                print('{}, {}'.format(k, v))
+            print('*' * 100)
+        config_dict.update(env_dict)
         # Write this config to .yaml.
         with open(FLAGS.train_config, 'w') as configfile:
             yaml.dump(config_dict, configfile)
