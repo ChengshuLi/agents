@@ -269,6 +269,16 @@ def train_eval(
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
+            'pedestrian_position': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+            'pedestrian_velocity': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
 #             'pedestrian': tf.keras.Sequential(mlp_layers(
 #                 conv_layer_params=None,
 #                 fc_layer_params=encoder_fc_layers,
@@ -545,7 +555,7 @@ def main(_):
 
     #goal_fc_layers = [256]
     conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
-    encoder_fc_layers = [256]
+    encoder_fc_layers = [256, 128]
     actor_fc_layers = [256]
     critic_obs_fc_layers = [256]
     critic_action_fc_layers = [256]
