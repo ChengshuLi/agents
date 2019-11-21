@@ -260,11 +260,11 @@ def train_eval(
 
         glorot_uniform_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
         preprocessing_layers = {
-             'depth': tf.keras.Sequential(mlp_layers(
-                 conv_layer_params=conv_layer_params,
-                 fc_layer_params=encoder_fc_layers,
-                 kernel_initializer=glorot_uniform_initializer,
-             )),
+#             'depth': tf.keras.Sequential(mlp_layers(
+#                 conv_layer_params=conv_layer_params,
+#                 fc_layer_params=encoder_fc_layers,
+#                 kernel_initializer=glorot_uniform_initializer,
+#             )),
             'sensor': tf.keras.Sequential(mlp_layers(
                 conv_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
