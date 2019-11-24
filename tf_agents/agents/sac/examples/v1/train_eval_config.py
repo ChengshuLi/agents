@@ -560,6 +560,7 @@ def main(_):
     env_config_file = os.path.join(config_path, 'env.yaml')
     layout_config_file = os.path.join(config_path, 'layout.yaml')
     params_config_file = os.path.join(config_path, 'params.yaml')
+    movements_config_file = os.path.join(config_path, 'movements.yaml')
     train_config_file = os.path.join(config_path, 'train.yaml')
     
 
@@ -572,6 +573,10 @@ def main(_):
 
     with open(layout_config_file, 'r') as layout_configfile:
         for line in layout_configfile:
+            combined_config.write(line)
+
+    with open(movements_config_file, 'r') as movements_configfile:
+        for line in movements_configfile:
             combined_config.write(line)
 
     # load train configs
@@ -597,6 +602,7 @@ def main(_):
 
     combined_config.close()
     print('COMBINED: {}'.format(combined_config_file))
+    
     train_eval(
         root_dir=os.path.join('experiments', FLAGS.root_dir),
         gpu=train_config.get('gpu_g'),

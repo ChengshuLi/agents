@@ -31,5 +31,4 @@ encoder_fc_layers: [256]
 
 # Simulation timestep (?)
 physics_timestep: 0.025
-action_timestep: 0.1
-~                        
+action_timestep: 0.1                        

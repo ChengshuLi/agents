@@ -92,21 +92,7 @@ humans:
   position_noise: 0.0
   velocity_noise: 0.0
   sensor: coordinates
-  personal_space: 1.0
-  max_linear_velocity: 1.0
+  personal_space: 0.5
+  max_linear_velocity: 3.0
   max_angular_velocity: 1.0
   kinematics: holonomic
-  # for random initialization and goal setting
-  initial_position:
-     min_x: -5.0
-     max_x: 5.0
-     min_y: -5.0
-     max_y: 5.0
-  target_position:
-     min_x: -5.0
-     max_x: 5.0
-     min_y: -5.0
-     max_y: 5.0
-     
-
-
