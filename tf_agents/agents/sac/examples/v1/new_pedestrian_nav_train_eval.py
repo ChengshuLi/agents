@@ -566,10 +566,10 @@ def main(_):
     #goal_fc_layers = [256]
     conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
     encoder_fc_layers = [256, 128, 64]
-    actor_fc_layers = [256]
-    critic_obs_fc_layers = [256]
-    critic_action_fc_layers = [256]
-    critic_joint_fc_layers = [256]    
+    actor_fc_layers = [256, 128, 64]
+    critic_obs_fc_layers = [256, 128, 64]
+    critic_action_fc_layers = [256, 128, 64]
+    critic_joint_fc_layers = [256, 128, 64]    
 
     for k, v in FLAGS.flag_values_dict().items():
         print(k, v)
