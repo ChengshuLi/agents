@@ -499,15 +499,16 @@ def train_eval(
                 name='global_steps_per_sec', data=steps_per_second_ph,
                 step=global_step)
 
-            for _ in range(num_iterations):
+            iterations_per_env = int(num_iterations/num_parallel_environments)
+            for _ in range(iterations_per_env):
                 start_time = time.time()
                 collect_call()
-                # print('collect:', time.time() - start_time)
+                #print('collect:', time.time() - start_time, int(1.0 / (time.time() - start_time)))
 
-                # train_start_time = time.time()
+                train_start_time = time.time()
                 for _ in range(train_steps_per_iteration):
                     total_loss, _ = train_step_call()
-                # print('train:', time.time() - train_start_time)
+                #print('train:', time.time() - train_start_time, int(1.0 / (time.time() - train_start_time)))
 
                 time_acc += time.time() - start_time
                 global_step_val = global_step_call()
