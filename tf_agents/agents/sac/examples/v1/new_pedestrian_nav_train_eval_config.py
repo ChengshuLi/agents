@@ -37,6 +37,7 @@ from absl import flags
 from absl import logging
 
 import gin
+import yaml
 import tensorflow as tf
 
 from tf_agents.agents.ddpg import critic_network
@@ -88,11 +89,11 @@ flags.DEFINE_integer('batch_size', 64,
                      'for train_steps_per_iteration times.')
 flags.DEFINE_float('gamma', 0.99,
                    'Discount_factor for the environment')
-flags.DEFINE_float('actor_learning_rate', 1e-4,
+flags.DEFINE_float('actor_learning_rate', 1e-3,
                    'Actor learning rate')
-flags.DEFINE_float('critic_learning_rate', 1e-4,
+flags.DEFINE_float('critic_learning_rate', 1e-3,
                    'Critic learning rate')
-flags.DEFINE_float('alpha_learning_rate', 1e-4,
+flags.DEFINE_float('alpha_learning_rate', 1e-3,
                    'Alpha learning rate')
 
 flags.DEFINE_integer('num_eval_episodes', 10,
@@ -264,26 +265,21 @@ def train_eval(
 #                 fc_layer_params=encoder_fc_layers,
 #                 kernel_initializer=glorot_uniform_initializer,
 #             )),
-#             'sensor': tf.keras.Sequential(mlp_layers(
-#                 conv_layer_params=None,
-#                 fc_layer_params=encoder_fc_layers,
-#                 kernel_initializer=glorot_uniform_initializer,
-#             )),
-#             'pedestrian_position': tf.keras.Sequential(mlp_layers(
-#                 conv_layer_params=None,
-#                 fc_layer_params=encoder_fc_layers,
-#                 kernel_initializer=glorot_uniform_initializer,
-#             )),
-#             'pedestrian_velocity': tf.keras.Sequential(mlp_layers(
-#                 conv_layer_params=None,
-#                 fc_layer_params=encoder_fc_layers,
-#                 kernel_initializer=glorot_uniform_initializer,
-#             )),
-           # 'pedestrian_ttc': tf.keras.Sequential(mlp_layers(
-           #      conv_layer_params=None,
-           #      fc_layer_params=encoder_fc_layers,
-           #      kernel_initializer=glorot_uniform_initializer,
-           #  )),            
+            'sensor': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+            'pedestrian_position': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+            'pedestrian_velocity': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
 #             'pedestrian': tf.keras.Sequential(mlp_layers(
 #                 conv_layer_params=None,
 #                 fc_layer_params=encoder_fc_layers,
@@ -293,15 +289,10 @@ def train_eval(
             #     conv_layer_params=None,
             #     fc_layer_params=encoder_fc_layers,
             #     kernel_initializer=glorot_uniform_initializer,
-            # )),
-            'concatenate': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=None,
-                fc_layer_params=encoder_fc_layers,
-                kernel_initializer=glorot_uniform_initializer,
-            )),      
+            # )),            
         }
-        #preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
-        preprocessing_combiner = None
+        preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
+        #preprocessing_combiner = None
 
         actor_net = actor_distribution_network.ActorDistributionNetwork(
             observation_spec,
@@ -499,16 +490,15 @@ def train_eval(
                 name='global_steps_per_sec', data=steps_per_second_ph,
                 step=global_step)
 
-            iterations_per_env = int(num_iterations/num_parallel_environments)
-            for _ in range(iterations_per_env):
+            for _ in range(num_iterations):
                 start_time = time.time()
                 collect_call()
-                #print('collect:', time.time() - start_time, int(1.0 / (time.time() - start_time)))
+                # print('collect:', time.time() - start_time)
 
-                train_start_time = time.time()
+                # train_start_time = time.time()
                 for _ in range(train_steps_per_iteration):
                     total_loss, _ = train_step_call()
-                #print('train:', time.time() - train_start_time, int(1.0 / (time.time() - train_start_time)))
+                # print('train:', time.time() - train_start_time)
 
                 time_acc += time.time() - start_time
                 global_step_val = global_step_call()
@@ -564,13 +554,37 @@ def main(_):
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.gpu_c)
 
-    #goal_fc_layers = [256]
-    conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
-    encoder_fc_layers = [256, 128, 64]
-    actor_fc_layers = [256, 128, 64]
-    critic_obs_fc_layers = [256, 128, 64]
-    critic_action_fc_layers = [256, 128, 64]
-    critic_joint_fc_layers = [256, 128, 64]    
+
+    # Set up paths to config files.
+    config_path = os.path.join(os.getcwd(), 'experiments', FLAGS.root_dir)
+    env_config_file = os.path.join(config_path, 'env.yaml')
+    layout_config_file = os.path.join(config_path, 'layout.yaml')
+    params_config_file = os.path.join(config_path, 'params.yaml')
+    train_config_file = os.path.join(config_path, 'train.yaml')
+    
+
+    # Combine env.yaml and layout.yaml in a fishy manner.
+    combined_config_file = os.path.join(config_path, 'combined.yaml')
+    combined_config = open(combined_config_file, 'w')
+    with open(env_config_file, 'r') as env_configfile:
+        for line in env_configfile:
+            combined_config.write(line)
+
+    with open(layout_config_file, 'r') as layout_configfile:
+        for line in layout_configfile:
+            combined_config.write(line)
+
+    # load train configs
+    with open(train_config_file, 'r') as configfile:
+        train_config = yaml.load(configfile)
+      
+
+    conv_layer_params = train_config.get('conv_layer_params')
+    encoder_fc_layers = train_config.get('encoder_fc_layers')
+    actor_fc_layers = train_config.get('actor_fc_layers')
+    critic_obs_fc_layers = train_config.get('critic_obs_fc_layers')
+    critic_action_fc_layers = train_config.get('critic_action_fc_layers')
+    critic_joint_fc_layers = train_config.get('critic_joint_fc_layers')
 
     for k, v in FLAGS.flag_values_dict().items():
         print(k, v)
@@ -581,17 +595,20 @@ def main(_):
     print('critic_action_fc_layers', critic_action_fc_layers)
     print('critic_joint_fc_layers', critic_joint_fc_layers)
 
+    combined_config.close()
+    print('COMBINED: {}'.format(combined_config_file))
     train_eval(
-        root_dir=FLAGS.root_dir,
-        gpu=FLAGS.gpu_g,
+        root_dir=os.path.join('experiments', FLAGS.root_dir),
+        gpu=train_config.get('gpu_g'),
         env_load_fn=lambda model_id, mode, device_idx: suite_gibson.load(
-            config_file=FLAGS.config_file,
+            # config_file=FLAGS.config_file,
+            config_file=combined_config_file,
             model_id=model_id,
             collision_reward_weight=FLAGS.collision_reward_weight,
-            env_type=FLAGS.env_type,
+            env_type=train_config.get('env_type'),
             env_mode=mode,
-            action_timestep=FLAGS.action_timestep,
-            physics_timestep=FLAGS.physics_timestep,
+            action_timestep=train_config.get('action_timestep'),
+            physics_timestep=train_config.get('physics_timestep'),
             device_idx=device_idx,
             random_position=FLAGS.random_position,
             fixed_obstacles=FLAGS.fixed_obstacles,
@@ -601,25 +618,25 @@ def main(_):
         ),
         model_ids=FLAGS.model_ids,
         eval_env_mode=FLAGS.env_mode,
-        num_iterations=FLAGS.num_iterations,
+        num_iterations=train_config.get('num_iterations'),
         conv_layer_params=conv_layer_params,
         encoder_fc_layers=encoder_fc_layers,
         actor_fc_layers=actor_fc_layers,
         critic_obs_fc_layers=critic_obs_fc_layers,
         critic_action_fc_layers=critic_action_fc_layers,
         critic_joint_fc_layers=critic_joint_fc_layers,
-        initial_collect_steps=FLAGS.initial_collect_steps,
-        collect_steps_per_iteration=FLAGS.collect_steps_per_iteration,
-        num_parallel_environments=FLAGS.num_parallel_environments,
-        replay_buffer_capacity=FLAGS.replay_buffer_capacity,
-        train_steps_per_iteration=FLAGS.train_steps_per_iteration,
-        batch_size=FLAGS.batch_size,
-        actor_learning_rate=FLAGS.actor_learning_rate,
-        critic_learning_rate=FLAGS.critic_learning_rate,
-        alpha_learning_rate=FLAGS.alpha_learning_rate,
-        gamma=FLAGS.gamma,
+        initial_collect_steps=train_config.get('initial_collect_steps'),
+        collect_steps_per_iteration=train_config.get('collect_steps_per_iteration'),
+        num_parallel_environments=train_config.get('num_parallel_environments'),
+        replay_buffer_capacity=train_config.get('replay_buffer_capacity'),
+        train_steps_per_iteration=train_config.get('train_steps_per_iteration'),
+        batch_size=train_config.get('batch_size'),
+        actor_learning_rate=train_config.get('actor_learning_rate'),
+        critic_learning_rate=train_config.get('critic_learning_rate'),
+        alpha_learning_rate=train_config.get('alpha_learning_rate'),
+        gamma=train_config.get('gamma'),
         num_eval_episodes=FLAGS.num_eval_episodes,
-        eval_interval=FLAGS.eval_interval,
+        eval_interval=train_config.get('eval_interval'),
         eval_only=FLAGS.eval_only,
         num_parallel_environments_eval=FLAGS.num_parallel_environments_eval,
         model_ids_eval=FLAGS.model_ids_eval,

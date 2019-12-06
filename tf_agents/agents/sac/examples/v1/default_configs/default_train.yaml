@@ -1,0 +1,35 @@
+# iterations
+batch_size: 256
+collect_steps_per_iteration: 1
+env_type: gibson
+eval_interval: 1000
+gpu_g: 0
+initial_collect_steps: 1000
+max_step: 300
+num_eval_episodes: 1
+num_iterations: 100000
+num_parallel_environments: 1
+replay_buffer_capacity: 50000
+train_steps_per_iteration: 1
+
+
+# Learning rates
+actor_learning_rate: 0.001
+critic_learning_rate: 0.001
+alpha_learning_rate: 0.001
+gamma: 0.99
+
+
+# Network architecture
+conv_layer_params: [[32, [8, 8], 4], [64, [4, 4], 2], [64, [3, 3], 1]]
+actor_fc_layers: [256]
+critic_action_fc_layers: [256]
+critic_joint_fc_layers: [256]
+critic_obs_fc_layers: [256]
+encoder_fc_layers: [256]
+
+
+# Simulation timestep (?)
+physics_timestep: 0.025
+action_timestep: 0.1
+~                        
