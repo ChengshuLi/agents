@@ -171,13 +171,13 @@ def train_eval(
         initial_collect_steps=10000,
         collect_steps_per_iteration=1,
         num_parallel_environments=1,
-        replay_buffer_capacity=100000,
+        replay_buffer_capacity=150000,
         # Params for target update
         target_update_tau=0.005,
         target_update_period=1,
         # Params for train
         train_steps_per_iteration=1,
-        batch_size=256,
+        batch_size=64,
         actor_learning_rate=3e-4,
         critic_learning_rate=3e-4,
         alpha_learning_rate=3e-4,
@@ -294,11 +294,7 @@ def train_eval(
             #     fc_layer_params=encoder_fc_layers,
             #     kernel_initializer=glorot_uniform_initializer,
             # )),
-            'concatenate': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=None,
-                fc_layer_params=encoder_fc_layers,
-                kernel_initializer=glorot_uniform_initializer,
-            )),      
+            'concatenate': tf.keras.layers.Lambda(lambda x: x),
         }
         #preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
         preprocessing_combiner = None
