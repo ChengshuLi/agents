@@ -67,7 +67,7 @@ flags.DEFINE_multi_string('gin_file', None,
 flags.DEFINE_multi_string('gin_param', None,
                           'Gin binding to pass through.')
 
-flags.DEFINE_integer('num_iterations', 500000,
+flags.DEFINE_integer('num_iterations', 1500000,
                      'Total number train/eval iterations to perform.')
 flags.DEFINE_integer('initial_collect_steps', 100,
                      'Number of steps to collect at the beginning of training using random policy')
@@ -77,7 +77,7 @@ flags.DEFINE_integer('num_parallel_environments', 1,
                      'Number of environments to run in parallel')
 flags.DEFINE_integer('num_parallel_environments_eval', 1,
                      'Number of environments to run in parallel for eval')
-flags.DEFINE_integer('replay_buffer_capacity', 50000,
+flags.DEFINE_integer('replay_buffer_capacity', 150000,
                      'Replay buffer capacity per env.')
 flags.DEFINE_integer('train_steps_per_iteration', 1,
                      'Number of training steps in every training iteration')
@@ -97,7 +97,7 @@ flags.DEFINE_float('alpha_learning_rate', 1e-4,
 
 flags.DEFINE_integer('num_eval_episodes', 10,
                      'The number of episodes to run eval on.')
-flags.DEFINE_integer('eval_interval', 10000,
+flags.DEFINE_integer('eval_interval', 1000,
                      'Run eval every eval_interval train steps')
 flags.DEFINE_boolean('eval_only', False,
                      'Whether to run evaluation only on trained checkpoints')
