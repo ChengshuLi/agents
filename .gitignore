@@ -11,3 +11,4 @@ __pycache__
 tensorboard_logs
 .project
 .pydevproject
+tf_agents_nightly.egg-info
