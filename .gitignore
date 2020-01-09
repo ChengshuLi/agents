@@ -9,3 +9,5 @@ __pycache__
 .vscode/
 .idea/
 tensorboard_logs
+.project
+.pydevproject
