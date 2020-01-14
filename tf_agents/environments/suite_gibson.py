@@ -69,23 +69,21 @@ def load(config_file,
     #                                               action_timestep=action_timestep,
     #                                               physics_timestep=physics_timestep,
     #                                               device_idx=device_idx)
-    elif env_type == 'mp':
-        env = MotionPlanningEnv(config_file=config_file,
-                                mode=env_mode,
-                                model_id=model_id,
-                                action_timestep=1e-8,
-                                physics_timestep=1e-8,
-                                device_idx=device_idx)
-
-    elif env_type == 'mp2':
+    # elif env_type == 'mp':
+    #     env = MotionPlanningEnv(config_file=config_file,
+    #                             mode=env_mode,
+    #                             model_id=model_id,
+    #                             action_timestep=1e-8,
+    #                             physics_timestep=1e-8,
+    #                             device_idx=device_idx)
+    elif env_type == 'ig_s2r_mp':
         env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                mode=env_mode,
-                                model_id=model_id,
-                                action_timestep=1e-8,
-                                physics_timestep=1e-8,
-                                device_idx=device_idx)
-
-
+                                       model_id=model_id,
+                                       collision_reward_weight=collision_reward_weight,
+                                       mode=env_mode,
+                                       action_timestep=1e-8,
+                                       physics_timestep=1e-8,
+                                       device_idx=device_idx)
 
     discount = env.discount_factor
     max_episode_steps = env.max_step
