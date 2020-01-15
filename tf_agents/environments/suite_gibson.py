@@ -83,7 +83,9 @@ def load(config_file,
                                        mode=env_mode,
                                        action_timestep=1e-8,
                                        physics_timestep=1e-8,
-                                       device_idx=device_idx)
+                                       device_idx=device_idx,
+                                       eval=env_mode == 'gui',
+                                       )
 
     discount = env.discount_factor
     max_episode_steps = env.max_step
