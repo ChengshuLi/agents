@@ -25,3 +25,4 @@ from tf_agents.environments import tf_py_environment
 from tf_agents.environments import trajectory_replay
 from tf_agents.environments import utils
 from tf_agents.environments import wrappers
+from tf_agents.environments import suite_gibson
