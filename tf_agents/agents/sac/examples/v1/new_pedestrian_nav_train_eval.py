@@ -67,7 +67,7 @@ flags.DEFINE_multi_string('gin_file', None,
 flags.DEFINE_multi_string('gin_param', None,
                           'Gin binding to pass through.')
 
-flags.DEFINE_integer('num_iterations', 1500000,
+flags.DEFINE_integer('num_iterations', 500000,
                      'Total number train/eval iterations to perform.')
 flags.DEFINE_integer('initial_collect_steps', 100,
                      'Number of steps to collect at the beginning of training using random policy')
@@ -77,7 +77,7 @@ flags.DEFINE_integer('num_parallel_environments', 1,
                      'Number of environments to run in parallel')
 flags.DEFINE_integer('num_parallel_environments_eval', 1,
                      'Number of environments to run in parallel for eval')
-flags.DEFINE_integer('replay_buffer_capacity', 150000,
+flags.DEFINE_integer('replay_buffer_capacity', 50000,
                      'Replay buffer capacity per env.')
 flags.DEFINE_integer('train_steps_per_iteration', 1,
                      'Number of training steps in every training iteration')
@@ -88,11 +88,11 @@ flags.DEFINE_integer('batch_size', 64,
                      'for train_steps_per_iteration times.')
 flags.DEFINE_float('gamma', 0.99,
                    'Discount_factor for the environment')
-flags.DEFINE_float('actor_learning_rate', 1e-4,
+flags.DEFINE_float('actor_learning_rate', 5e-4,
                    'Actor learning rate')
-flags.DEFINE_float('critic_learning_rate', 1e-4,
+flags.DEFINE_float('critic_learning_rate', 5e-4,
                    'Critic learning rate')
-flags.DEFINE_float('alpha_learning_rate', 1e-4,
+flags.DEFINE_float('alpha_learning_rate', 5e-4,
                    'Alpha learning rate')
 
 flags.DEFINE_integer('num_eval_episodes', 10,
@@ -160,7 +160,7 @@ def train_eval(
         env_load_fn=None,
         model_ids=None,
         eval_env_mode='headless',
-        num_iterations=1000000,
+        num_iterations=500000,
         conv_layer_params=None,
         encoder_fc_layers=[256],
         actor_fc_layers=[256, 256],
@@ -168,19 +168,19 @@ def train_eval(
         critic_action_fc_layers=None,
         critic_joint_fc_layers=[256, 256],
         # Params for collect
-        initial_collect_steps=10000,
+        initial_collect_steps=1000,
         collect_steps_per_iteration=1,
         num_parallel_environments=1,
-        replay_buffer_capacity=150000,
+        replay_buffer_capacity=50000,
         # Params for target update
         target_update_tau=0.005,
         target_update_period=1,
         # Params for train
         train_steps_per_iteration=1,
         batch_size=64,
-        actor_learning_rate=3e-4,
-        critic_learning_rate=3e-4,
-        alpha_learning_rate=3e-4,
+        actor_learning_rate=5e-4,
+        critic_learning_rate=5e-4,
+        alpha_learning_rate=5e-4,
         td_errors_loss_fn=tf.compat.v1.losses.mean_squared_error,
         gamma=0.99,
         reward_scale_factor=1.0,
