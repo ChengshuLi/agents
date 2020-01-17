@@ -88,11 +88,11 @@ flags.DEFINE_integer('batch_size', 64,
                      'for train_steps_per_iteration times.')
 flags.DEFINE_float('gamma', 0.99,
                    'Discount_factor for the environment')
-flags.DEFINE_float('actor_learning_rate', 5e-4,
+flags.DEFINE_float('actor_learning_rate', 1e-3,
                    'Actor learning rate')
-flags.DEFINE_float('critic_learning_rate', 5e-4,
+flags.DEFINE_float('critic_learning_rate', 1e-3,
                    'Critic learning rate')
-flags.DEFINE_float('alpha_learning_rate', 5e-4,
+flags.DEFINE_float('alpha_learning_rate', 1e-3,
                    'Alpha learning rate')
 
 flags.DEFINE_integer('num_eval_episodes', 10,
@@ -163,10 +163,10 @@ def train_eval(
         num_iterations=500000,
         conv_layer_params=None,
         encoder_fc_layers=[256],
-        actor_fc_layers=[256, 256],
+        actor_fc_layers=[256],
         critic_obs_fc_layers=None,
         critic_action_fc_layers=None,
-        critic_joint_fc_layers=[256, 256],
+        critic_joint_fc_layers=[256],
         # Params for collect
         initial_collect_steps=1000,
         collect_steps_per_iteration=1,
@@ -178,9 +178,9 @@ def train_eval(
         # Params for train
         train_steps_per_iteration=1,
         batch_size=64,
-        actor_learning_rate=5e-4,
-        critic_learning_rate=5e-4,
-        alpha_learning_rate=5e-4,
+        actor_learning_rate=1e-3,
+        critic_learning_rate=1e-3,
+        alpha_learning_rate=1e-3,
         td_errors_loss_fn=tf.compat.v1.losses.mean_squared_error,
         gamma=0.99,
         reward_scale_factor=1.0,
@@ -259,16 +259,16 @@ def train_eval(
 
         glorot_uniform_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
         preprocessing_layers = {
-#             'depth': tf.keras.Sequential(mlp_layers(
-#                 conv_layer_params=conv_layer_params,
-#                 fc_layer_params=encoder_fc_layers,
-#                 kernel_initializer=glorot_uniform_initializer,
-#             )),
-#             'sensor': tf.keras.Sequential(mlp_layers(
-#                 conv_layer_params=None,
-#                 fc_layer_params=encoder_fc_layers,
-#                 kernel_initializer=glorot_uniform_initializer,
-#             )),
+            'depth': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=conv_layer_params,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+            'sensor': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
 #             'pedestrian_position': tf.keras.Sequential(mlp_layers(
 #                 conv_layer_params=None,
 #                 fc_layer_params=encoder_fc_layers,
@@ -294,10 +294,10 @@ def train_eval(
             #     fc_layer_params=encoder_fc_layers,
             #     kernel_initializer=glorot_uniform_initializer,
             # )),
-            'concatenate': tf.keras.layers.Lambda(lambda x: x),
+            # 'concatenate': tf.keras.layers.Lambda(lambda x: x),
         }
-        #preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
-        preprocessing_combiner = None
+        preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
+        #preprocessing_combiner = None
 
         actor_net = actor_distribution_network.ActorDistributionNetwork(
             observation_spec,
@@ -562,11 +562,11 @@ def main(_):
 
     #goal_fc_layers = [256]
     conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
-    encoder_fc_layers = [256, 128, 64]
-    actor_fc_layers = [256, 128, 64]
-    critic_obs_fc_layers = [256, 128, 64]
-    critic_action_fc_layers = [256, 128, 64]
-    critic_joint_fc_layers = [256, 128, 64]    
+    encoder_fc_layers = [256]
+    actor_fc_layers = [256]
+    critic_obs_fc_layers = [256]
+    critic_action_fc_layers = [256]
+    critic_joint_fc_layers = [256]    
 
     for k, v in FLAGS.flag_values_dict().items():
         print(k, v)
