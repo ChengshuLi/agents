@@ -35,8 +35,7 @@ def tanh_squash_to_spec(inputs, spec):
   means = (spec.maximum + spec.minimum) / 2.0
   magnitudes = (spec.maximum - spec.minimum) / 2.0
 
-  return inputs
-  #return means + magnitudes * tf.tanh(inputs)
+  return means + magnitudes * tf.tanh(inputs)
 
 
 @gin.configurable
