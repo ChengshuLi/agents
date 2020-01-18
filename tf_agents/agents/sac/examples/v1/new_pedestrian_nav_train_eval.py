@@ -495,7 +495,7 @@ def train_eval(
                 name='global_steps_per_sec', data=steps_per_second_ph,
                 step=global_step)
 
-            iterations_per_env = int(num_iterations/num_parallel_environments)
+            iterations_per_env = int(num_iterations)
             for _ in range(iterations_per_env):
                 start_time = time.time()
                 collect_call()
