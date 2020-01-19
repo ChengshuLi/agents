@@ -45,7 +45,7 @@ max_step: 300
 # output: [sensor, scan, pedestrian]
 #output: [sensor, pedestrian]
 # output: [sensor, scan]
-output: [sensor, depth, pedestrian_position, pedestrian_velocity]
+output: [sensor, depth, pedestrian_position, pedestrian_velocity, pedestrian_ttc]
 scan_beams: 512 #128 
 scan_vertical_beams: 1 #9 
 resolution: 64

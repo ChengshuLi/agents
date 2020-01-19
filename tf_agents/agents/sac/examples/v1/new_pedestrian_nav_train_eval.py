@@ -97,7 +97,7 @@ flags.DEFINE_float('alpha_learning_rate', 1e-3,
 
 flags.DEFINE_integer('num_eval_episodes', 10,
                      'The number of episodes to run eval on.')
-flags.DEFINE_integer('eval_interval', 10000,
+flags.DEFINE_integer('eval_interval', 1000,
                      'Run eval every eval_interval train steps')
 flags.DEFINE_boolean('eval_only', False,
                      'Whether to run evaluation only on trained checkpoints')
@@ -160,27 +160,27 @@ def train_eval(
         env_load_fn=None,
         model_ids=None,
         eval_env_mode='headless',
-        num_iterations=1000000,
+        num_iterations=500000,
         conv_layer_params=None,
         encoder_fc_layers=[256],
-        actor_fc_layers=[256, 256],
+        actor_fc_layers=[256],
         critic_obs_fc_layers=None,
         critic_action_fc_layers=None,
-        critic_joint_fc_layers=[256, 256],
+        critic_joint_fc_layers=[256],
         # Params for collect
-        initial_collect_steps=10000,
+        initial_collect_steps=1000,
         collect_steps_per_iteration=1,
         num_parallel_environments=1,
-        replay_buffer_capacity=100000,
+        replay_buffer_capacity=50000,
         # Params for target update
         target_update_tau=0.005,
         target_update_period=1,
         # Params for train
         train_steps_per_iteration=1,
-        batch_size=256,
-        actor_learning_rate=3e-4,
-        critic_learning_rate=3e-4,
-        alpha_learning_rate=3e-4,
+        batch_size=64,
+        actor_learning_rate=1e-3,
+        critic_learning_rate=1e-3,
+        alpha_learning_rate=1e-3,
         td_errors_loss_fn=tf.compat.v1.losses.mean_squared_error,
         gamma=0.99,
         reward_scale_factor=1.0,
@@ -259,26 +259,31 @@ def train_eval(
 
         glorot_uniform_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
         preprocessing_layers = {
-             'depth': tf.keras.Sequential(mlp_layers(
-                 conv_layer_params=conv_layer_params,
-                 fc_layer_params=encoder_fc_layers,
-                 kernel_initializer=glorot_uniform_initializer,
-             )),
+            'depth': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=conv_layer_params,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
             'sensor': tf.keras.Sequential(mlp_layers(
                 conv_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
-            'pedestrian_position': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=None,
-                fc_layer_params=encoder_fc_layers,
-                kernel_initializer=glorot_uniform_initializer,
-            )),
-            'pedestrian_velocity': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=None,
-                fc_layer_params=encoder_fc_layers,
-                kernel_initializer=glorot_uniform_initializer,
-            )),
+#             'pedestrian_position': tf.keras.Sequential(mlp_layers(
+#                 conv_layer_params=None,
+#                 fc_layer_params=encoder_fc_layers,
+#                 kernel_initializer=glorot_uniform_initializer,
+#             )),
+#             'pedestrian_velocity': tf.keras.Sequential(mlp_layers(
+#                 conv_layer_params=None,
+#                 fc_layer_params=encoder_fc_layers,
+#                 kernel_initializer=glorot_uniform_initializer,
+#             )),
+           # 'pedestrian_ttc': tf.keras.Sequential(mlp_layers(
+           #      conv_layer_params=None,
+           #      fc_layer_params=encoder_fc_layers,
+           #      kernel_initializer=glorot_uniform_initializer,
+           #  )),            
 #             'pedestrian': tf.keras.Sequential(mlp_layers(
 #                 conv_layer_params=None,
 #                 fc_layer_params=encoder_fc_layers,
@@ -288,7 +293,8 @@ def train_eval(
             #     conv_layer_params=None,
             #     fc_layer_params=encoder_fc_layers,
             #     kernel_initializer=glorot_uniform_initializer,
-            # )),            
+            # )),
+            # 'concatenate': tf.keras.layers.Lambda(lambda x: x),
         }
         preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
         #preprocessing_combiner = None
@@ -489,15 +495,16 @@ def train_eval(
                 name='global_steps_per_sec', data=steps_per_second_ph,
                 step=global_step)
 
-            for _ in range(num_iterations):
+            iterations_per_env = int(num_iterations)
+            for _ in range(iterations_per_env):
                 start_time = time.time()
                 collect_call()
-                # print('collect:', time.time() - start_time)
+                #print('collect:', time.time() - start_time, int(1.0 / (time.time() - start_time)))
 
-                # train_start_time = time.time()
+                train_start_time = time.time()
                 for _ in range(train_steps_per_iteration):
                     total_loss, _ = train_step_call()
-                # print('train:', time.time() - train_start_time)
+                #print('train:', time.time() - train_start_time, int(1.0 / (time.time() - train_start_time)))
 
                 time_acc += time.time() - start_time
                 global_step_val = global_step_call()
@@ -555,7 +562,7 @@ def main(_):
 
     #goal_fc_layers = [256]
     conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
-    encoder_fc_layers = [256, 128]
+    encoder_fc_layers = [256]
     actor_fc_layers = [256]
     critic_obs_fc_layers = [256]
     critic_action_fc_layers = [256]

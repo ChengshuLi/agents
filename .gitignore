@@ -8,3 +8,7 @@ __pycache__
 *.swp
 .vscode/
 .idea/
+tensorboard_logs
+.project
+.pydevproject
+tf_agents_nightly.egg-info
