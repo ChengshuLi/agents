@@ -103,7 +103,8 @@ class BatchSquash(object):
       # pyformat: enable
 
 
-def mlp_layers(conv_layer_params=None,
+def mlp_layers(conv_1d_layer_params=None,
+               conv_2d_layer_params=None,
                fc_layer_params=None,
                dropout_layer_params=None,
                activation_fn=tf.keras.activations.relu,
@@ -112,7 +113,10 @@ def mlp_layers(conv_layer_params=None,
   """Generates conv and fc layers to encode into a hidden state.
 
   Args:
-    conv_layer_params: Optional list of convolution layers parameters, where
+    conv_1d_layer_params: Optional list of 1D convolution layers parameters, where
+      each item is a length-three tuple indicating (filters, kernel_size,
+      stride).
+    conv_2d_layer_params: Optional list of 2D convolution layers parameters, where
       each item is a length-three tuple indicating (filters, kernel_size,
       stride).
     fc_layer_params: Optional list of fully_connected parameters, where each
@@ -144,7 +148,18 @@ def mlp_layers(conv_layer_params=None,
 
   layers = []
 
-  if conv_layer_params is not None:
+  if conv_1d_layer_params is not None:
+    layers.extend([
+        tf.keras.layers.Conv1D(
+            filters=filters,
+            kernel_size=kernel_size,
+            strides=strides,
+            activation=activation_fn,
+            kernel_initializer=kernel_initializer,
+            name='/'.join([name, 'conv1d']) if name else None)
+        for (filters, kernel_size, strides) in conv_1d_layer_params
+    ])
+  if conv_2d_layer_params is not None:
     layers.extend([
         tf.keras.layers.Conv2D(
             filters=filters,
@@ -153,7 +168,7 @@ def mlp_layers(conv_layer_params=None,
             activation=activation_fn,
             kernel_initializer=kernel_initializer,
             name='/'.join([name, 'conv2d']) if name else None)
-        for (filters, kernel_size, strides) in conv_layer_params
+        for (filters, kernel_size, strides) in conv_2d_layer_params
     ])
   layers.append(tf.keras.layers.Flatten())
 

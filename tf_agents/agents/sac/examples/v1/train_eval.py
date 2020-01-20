@@ -61,7 +61,6 @@ from tf_agents.utils import common
 from tf_agents.utils import episode_utils
 from IPython import embed
 
-
 flags.DEFINE_string('root_dir', os.getenv('TEST_UNDECLARED_OUTPUTS_DIR'),
                     'Root directory for writing logs/summaries/checkpoints.')
 flags.DEFINE_multi_string('gin_file', None,
@@ -157,7 +156,8 @@ def train_eval(
         model_ids=None,
         eval_env_mode='headless',
         num_iterations=1000000,
-        conv_layer_params=None,
+        conv_1d_layer_params=None,
+        conv_2d_layer_params=None,
         encoder_fc_layers=[256],
         actor_fc_layers=[256, 256],
         critic_obs_fc_layers=None,
@@ -227,13 +227,13 @@ def train_eval(
         if model_ids is None:
             model_ids = [None] * num_parallel_environments
         else:
-            assert len(model_ids) == num_parallel_environments,\
+            assert len(model_ids) == num_parallel_environments, \
                 'model ids provided, but length not equal to num_parallel_environments'
 
         if model_ids_eval is None:
             model_ids_eval = [None] * num_parallel_environments_eval
         else:
-            assert len(model_ids_eval) == num_parallel_environments_eval,\
+            assert len(model_ids_eval) == num_parallel_environments_eval, \
                 'model ids eval provided, but length not equal to num_parallel_environments_eval'
 
         tf_py_env = [lambda model_id=model_ids[i]: env_load_fn(model_id, 'headless', gpu)
@@ -256,17 +256,26 @@ def train_eval(
         glorot_uniform_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
         preprocessing_layers = {
             'depth': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=conv_layer_params,
+                conv_1d_layer_params=None,
+                conv_2d_layer_params=conv_2d_layer_params,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
             'rgb': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=conv_layer_params,
+                conv_1d_layer_params=None,
+                conv_2d_layer_params=conv_2d_layer_params,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+            'scan': tf.keras.Sequential(mlp_layers(
+                conv_1d_layer_params=conv_1d_layer_params,
+                conv_2d_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
             'sensor': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=None,
+                conv_1d_layer_params=None,
+                conv_2d_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
@@ -526,6 +535,7 @@ def train_eval(
 
         sess.close()
 
+
 def main(_):
     tf.compat.v1.enable_resource_variables()
     logging.set_verbosity(logging.INFO)
@@ -533,7 +543,8 @@ def main(_):
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.gpu_c)
 
-    conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
+    conv_1d_layer_params = [(32, 8, 4), (64, 4, 2), (64, 3, 1)]
+    conv_2d_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
     encoder_fc_layers = [256]
     actor_fc_layers = [256]
     critic_obs_fc_layers = [256]
@@ -542,7 +553,8 @@ def main(_):
 
     for k, v in FLAGS.flag_values_dict().items():
         print(k, v)
-    print('conv_layer_params', conv_layer_params)
+    print('conv_1d_layer_params', conv_1d_layer_params)
+    print('conv_2d_layer_params', conv_2d_layer_params)
     print('encoder_fc_layers', encoder_fc_layers)
     print('actor_fc_layers', actor_fc_layers)
     print('critic_obs_fc_layers', critic_obs_fc_layers)
@@ -567,7 +579,8 @@ def main(_):
         model_ids=FLAGS.model_ids,
         eval_env_mode=FLAGS.env_mode,
         num_iterations=FLAGS.num_iterations,
-        conv_layer_params=conv_layer_params,
+        conv_1d_layer_params=conv_1d_layer_params,
+        conv_2d_layer_params=conv_2d_layer_params,
         encoder_fc_layers=encoder_fc_layers,
         actor_fc_layers=actor_fc_layers,
         critic_obs_fc_layers=critic_obs_fc_layers,

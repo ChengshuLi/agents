@@ -85,6 +85,29 @@ def load(config_file,
                                        physics_timestep=1e-8,
                                        device_idx=device_idx,
                                        eval=env_mode == 'gui',
+                                       arena=None,
+                                       )
+    elif env_type == 'ig_s2r_mp_button':
+        env = MotionPlanningBaseArmEnv(config_file=config_file,
+                                       model_id=model_id,
+                                       collision_reward_weight=collision_reward_weight,
+                                       mode=env_mode,
+                                       action_timestep=1e-8,
+                                       physics_timestep=1e-8,
+                                       device_idx=device_idx,
+                                       eval=env_mode == 'gui',
+                                       arena='button',
+                                       )
+    elif env_type == 'ig_s2r_mp_push_door':
+        env = MotionPlanningBaseArmEnv(config_file=config_file,
+                                       model_id=model_id,
+                                       collision_reward_weight=collision_reward_weight,
+                                       mode=env_mode,
+                                       action_timestep=1e-8,
+                                       physics_timestep=1e-8,
+                                       device_idx=device_idx,
+                                       eval=env_mode == 'gui',
+                                       arena='push_door',
                                        )
 
     discount = env.discount_factor
