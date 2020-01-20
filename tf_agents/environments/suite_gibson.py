@@ -84,6 +84,7 @@ def load(config_file,
                                        action_timestep=1e-8,
                                        physics_timestep=1e-8,
                                        device_idx=device_idx,
+                                       arena='button',
                                        eval=env_mode == 'gui',
                                        arena=None,
                                        )
