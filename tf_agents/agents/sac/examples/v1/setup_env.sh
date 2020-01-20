@@ -30,11 +30,17 @@ done
 
 # Read layout choice.
 PS3="Layout to use: "
-option_layouts=("basic")
+option_layouts=("empty" "basic" "hallway")
 select layout in "${option_layouts[@]}"
 do
     case $layout in
+        "empty")
+            break
+            ;;
         "basic")
+            break
+            ;;
+        "hallway")
             break
             ;;
         *) echo "invalid option $REPLY";;

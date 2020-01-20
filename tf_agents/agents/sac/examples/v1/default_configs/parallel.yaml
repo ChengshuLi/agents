@@ -6,8 +6,8 @@ movements:
     y_range_radius: 0.5
     flip_prob: 0.5
   agent:
-    initial_positions: 'entrance_1'
-    target_positions: 'entrance_3'
+    initial_positions: 'entrance_2'
+    target_positions: 'entrance_4'
     x_range_radius: 1.0
     y_range_radius: 1.0
 
