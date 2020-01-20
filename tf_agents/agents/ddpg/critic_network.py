@@ -118,6 +118,7 @@ class CriticNetwork(network.Network):
 
         self._action_layers = utils.mlp_layers(
             None,
+            None,
             action_fc_layer_params,
             action_dropout_layer_params,
             activation_fn=activation_fn,
@@ -125,6 +126,7 @@ class CriticNetwork(network.Network):
             name='action_encoding')
 
         self._joint_layers = utils.mlp_layers(
+            None,
             None,
             joint_fc_layer_params,
             joint_dropout_layer_params,
