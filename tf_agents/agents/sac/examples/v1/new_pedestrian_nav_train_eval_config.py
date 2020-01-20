@@ -273,17 +273,17 @@ def train_eval(
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
+            'rgb': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=conv_layer_params,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
             'pedestrian_position': tf.keras.Sequential(mlp_layers(
                 conv_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
             'pedestrian_velocity': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=None,
-                fc_layer_params=encoder_fc_layers,
-                kernel_initializer=glorot_uniform_initializer,
-            )),
-            'pedestrian': tf.keras.Sequential(mlp_layers(
                 conv_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
@@ -366,8 +366,12 @@ def train_eval(
         replay_observer = [replay_buffer.add_batch]
 
         if eval_deterministic:
+            print('=' * 100)
+            print('EVAL DETERMINISTIC')
             eval_py_policy = py_tf_policy.PyTFPolicy(greedy_policy.GreedyPolicy(tf_agent.policy))
         else:
+            print('=' * 100)
+            print('SOFT EVAL')
             eval_py_policy = py_tf_policy.PyTFPolicy(tf_agent.policy)
 
         step_metrics = [
@@ -666,6 +670,7 @@ def main(_):
         gamma=train_config.get('gamma'),
         num_eval_episodes=FLAGS.num_eval_episodes,
         eval_interval=train_config.get('eval_interval'),
+        eval_deterministic=FLAGS.eval_deterministic,
         eval_only=FLAGS.eval_only,
         num_parallel_environments_eval=FLAGS.num_parallel_environments_eval,
         model_ids_eval=FLAGS.model_ids_eval,
