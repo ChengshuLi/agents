@@ -259,16 +259,16 @@ def train_eval(
 
         glorot_uniform_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
         preprocessing_layers = {
-            'depth': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=conv_layer_params,
-                fc_layer_params=encoder_fc_layers,
-                kernel_initializer=glorot_uniform_initializer,
-            )),
-            'sensor': tf.keras.Sequential(mlp_layers(
-                conv_layer_params=None,
-                fc_layer_params=encoder_fc_layers,
-                kernel_initializer=glorot_uniform_initializer,
-            )),
+            # 'depth': tf.keras.Sequential(mlp_layers(
+            #     conv_layer_params=conv_layer_params,
+            #     fc_layer_params=encoder_fc_layers,
+            #     kernel_initializer=glorot_uniform_initializer,
+            # )),
+            #'sensor': tf.keras.Sequential(mlp_layers(
+            #    conv_layer_params=None,
+            #    fc_layer_params=encoder_fc_layers,
+            #    kernel_initializer=glorot_uniform_initializer,
+#            )),
 #             'pedestrian_position': tf.keras.Sequential(mlp_layers(
 #                 conv_layer_params=None,
 #                 fc_layer_params=encoder_fc_layers,
@@ -294,10 +294,10 @@ def train_eval(
             #     fc_layer_params=encoder_fc_layers,
             #     kernel_initializer=glorot_uniform_initializer,
             # )),
-            # 'concatenate': tf.keras.layers.Lambda(lambda x: x),
+            'concatenate': tf.keras.layers.Lambda(lambda x: x),
         }
-        preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
-        #preprocessing_combiner = None
+        #preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
+        preprocessing_combiner = None
 
         actor_net = actor_distribution_network.ActorDistributionNetwork(
             observation_spec,
@@ -562,11 +562,11 @@ def main(_):
 
     #goal_fc_layers = [256]
     conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
-    encoder_fc_layers = [256]
-    actor_fc_layers = [256]
-    critic_obs_fc_layers = [256]
-    critic_action_fc_layers = [256]
-    critic_joint_fc_layers = [256]    
+    encoder_fc_layers = [1024, 512, 256]
+    actor_fc_layers = [1024, 512, 256]
+    critic_obs_fc_layers = [1024, 512, 256]
+    critic_action_fc_layers = [1024, 512, 256]
+    critic_joint_fc_layers = [1024, 512, 256]    
 
     for k, v in FLAGS.flag_values_dict().items():
         print(k, v)
