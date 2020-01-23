@@ -11,8 +11,9 @@ num_pedestrians: 2
 pedestrians_can_see_robot: false
 
 # robot
-robot: Turtlebot
+robot: TurtlebotDifferentialDrive
 velocity: 0.1
+collision_ignore_link_a_ids: [1, 2, 3, 4]
 
 # task, observation and action
 task: pointgoal # pointgoal|objectgoal|areagoal|reaching

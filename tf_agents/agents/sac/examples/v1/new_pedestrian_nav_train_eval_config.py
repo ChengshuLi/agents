@@ -629,7 +629,7 @@ def main(_):
         sensor_inputs = env_config.get('output')[:]
 
     print('SENSOR INPUTS: {}'.format(sensor_inputs))
-    print('COMBINED: {}'.format(combined_config_file))
+    print('=' * 50 + 'COMBINED: {}'.format(combined_config_file))
     train_eval(
         root_dir=os.path.join('experiments', FLAGS.root_dir),
         gpu=train_config.get('gpu_g'),

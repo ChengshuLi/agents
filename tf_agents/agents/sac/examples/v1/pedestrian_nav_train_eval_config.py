@@ -206,7 +206,8 @@ def train_eval(
         summaries_flush_secs=10,
         debug_summaries=False,
         summarize_grads_and_vars=False,
-        eval_metrics_callback=None):
+        eval_metrics_callback=None,
+        sensor_inputs=[]):
     """A simple train and eval for SAC."""
     root_dir = os.path.expanduser(root_dir)
     train_dir = os.path.join(root_dir, 'train')
@@ -263,7 +264,12 @@ def train_eval(
         print('action_spec', action_spec)
 
         glorot_uniform_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
-        preprocessing_layers = {
+        
+        # Define the architecture of preprocessing layers.
+        
+        # sensor_inputs = config_dict.get('output')
+        print('Sensor inputs: {}'.format(sensor_inputs))
+        preprocessing_layers_architecture = {
              'depth': tf.keras.Sequential(mlp_layers(
                  conv_layer_params=conv_layer_params,
                  fc_layer_params=encoder_fc_layers,
@@ -274,18 +280,34 @@ def train_eval(
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             )),
-            # 'pedestrian': tf.keras.Sequential(mlp_layers(
-            #     conv_layer_params=None,
-            #     fc_layer_params=encoder_fc_layers,
-            #     kernel_initializer=glorot_uniform_initializer,
-            # )),
-            # 'scan': tf.keras.Sequential(mlp_layers(
-            #     conv_layer_params=None,
-            #     fc_layer_params=encoder_fc_layers,
-            #     kernel_initializer=glorot_uniform_initializer,
-            # )),            
+            'pedestrian_position': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+            'pedestrian_velocity': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+            'pedestrian_ttc': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+            'scan': tf.keras.Sequential(mlp_layers(
+                conv_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+            'concatenate': tf.keras.layers.Lambda(lambda x: x),
         }
+
+        preprocessing_layers = dict()
+        for sensor_input in sensor_inputs:
+            preprocessing_layers[sensor_input] = preprocessing_layers_architecture[sensor_input]
         preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
+        
         #preprocessing_combiner = None
 
         actor_net = actor_distribution_network.ActorDistributionNetwork(
@@ -332,7 +354,7 @@ def train_eval(
         config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
         sess = tf.compat.v1.Session(config=config)
-
+        
         # Make the replay buffer.
         replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(
             data_spec=tf_agent.collect_data_spec,
@@ -571,7 +593,7 @@ def main(_):
     abs_config_file = '/'.join(gibson_path[:-1] + config_path)
     print('CONFIG FILE: {}'.format(abs_config_file))
     # In train mode, save parameters to config file
-    if not FLAGS.eval_only and not FLAGS.train_load_yaml:
+    if not FLAGS.train_load_yaml:
         print('TRAIN MODE --> WRITE TO YAML FILE')
         config_dict = {
         # Environment setting.
@@ -586,6 +608,7 @@ def main(_):
         'random_obstacles': FLAGS.random_obstacles,
         'pedestrians': FLAGS.pedestrians,
         'random_height': False,
+        'sensor_inputs': ['sensor'],
         # Training / Eval setting.
         'num_iterations': FLAGS.num_iterations,
         'num_eval_episodes': FLAGS.num_eval_episodes,
@@ -620,7 +643,8 @@ def main(_):
                 print('{}, {}'.format(k, v))
             print('*' * 100)
         config_dict.update(env_dict)
-        # Write this config to .yaml.
+        # Write this config to .yaml under current directory.
+        print('train config: {}'.format(FLAGS.train_config))
         with open(FLAGS.train_config, 'w') as configfile:
             yaml.dump(config_dict, configfile)
     
@@ -679,6 +703,7 @@ def main(_):
         eval_only=FLAGS.eval_only,
         num_parallel_environments_eval=FLAGS.num_parallel_environments_eval,
         model_ids_eval=FLAGS.model_ids_eval,
+        sensor_inputs=config_dict.get('output')
     )
 
 
