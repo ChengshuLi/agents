@@ -18,9 +18,9 @@ import gin
 
 from tf_agents.environments import gym_wrapper
 from tf_agents.environments import wrappers
-from gibson2.envs.locomotor_env import NavigateEnv, NavigateRandomEnv
+from gibson2.envs.locomotor_env import NavigateEnv, NavigateRandomEnv, NavigatePedestriansEnv
 from gibson2.envs.locomotor_env import InteractiveGibsonNavigateEnv#, InteractiveGibsonNavigateSim2RealEnv
-from gibson2.envs.motion_planner_env import MotionPlanningEnv, MotionPlanningBaseArmEnv
+#from gibson2.envs.motion_planner_env import MotionPlanningEnv, MotionPlanningBaseArmEnv
 import gibson2
 
 
@@ -34,6 +34,9 @@ def load(config_file,
          physics_timestep=1.0 / 40.0,
          device_idx=0,
          random_position=False,
+         fixed_obstacles=False,
+         pedestrians=False,   
+         random_obstacles=False,         
          random_height=False,
          gym_env_wrappers=(),
          env_wrappers=(),
@@ -41,7 +44,34 @@ def load(config_file,
     config_file = os.path.join(os.path.dirname(gibson2.__file__), config_file)
     if env_type == 'gibson':
         if random_position:
-            env = NavigateRandomEnv(config_file=config_file,
+           env = NavigateRandomEnv(config_file=config_file,
+                                    mode=env_mode,
+                                    action_timestep=action_timestep,
+                                    physics_timestep=physics_timestep,
+                                    device_idx=device_idx,
+                                    random_height=random_height)
+           env = NavigateRandomEnv(config_file=config_file,
+                                    mode=env_mode,
+                                    action_timestep=action_timestep,
+                                    physics_timestep=physics_timestep,
+                                    device_idx=device_idx,
+                                    random_height=random_height)
+        elif fixed_obstacles:
+            env = NavigateObstaclesEnv(config_file=config_file,
+                                    mode=env_mode,
+                                    action_timestep=action_timestep,
+                                    physics_timestep=physics_timestep,
+                                    device_idx=device_idx,
+                                    random_height=random_height)
+        elif random_obstacles:
+            env = NavigateRandomObstaclesEnv(config_file=config_file,
+                                    mode=env_mode,
+                                    action_timestep=action_timestep,
+                                    physics_timestep=physics_timestep,
+                                    device_idx=device_idx,
+                                    random_height=random_height)
+        elif pedestrians:
+            env = NavigatePedestriansEnv(config_file=config_file,
                                     mode=env_mode,
                                     action_timestep=action_timestep,
                                     physics_timestep=physics_timestep,
@@ -52,7 +82,7 @@ def load(config_file,
                               mode=env_mode,
                               action_timestep=action_timestep,
                               physics_timestep=physics_timestep,
-                              device_idx=device_idx)
+                              device_idx=device_idx)         
     elif env_type == 'ig':
         env = InteractiveGibsonNavigateEnv(config_file=config_file,
                                            model_id=model_id,

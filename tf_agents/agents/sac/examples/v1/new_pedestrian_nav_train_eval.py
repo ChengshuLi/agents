@@ -28,6 +28,7 @@ python tf_agents/agents/sac/examples/v1/train_eval.py \
 
 from __future__ import absolute_import
 from __future__ import division
+from __future__ import print_function
 
 import os
 import time
@@ -58,7 +59,7 @@ from tf_agents.policies import random_tf_policy
 from tf_agents.replay_buffers import tf_uniform_replay_buffer
 from tf_agents.utils import common
 from tf_agents.utils import episode_utils
-
+from IPython import embed
 
 flags.DEFINE_string('root_dir', os.getenv('TEST_UNDECLARED_OUTPUTS_DIR'),
                     'Root directory for writing logs/summaries/checkpoints.')
@@ -67,9 +68,9 @@ flags.DEFINE_multi_string('gin_file', None,
 flags.DEFINE_multi_string('gin_param', None,
                           'Gin binding to pass through.')
 
-flags.DEFINE_integer('num_iterations', 500000,
+flags.DEFINE_integer('num_iterations', 1000000,
                      'Total number train/eval iterations to perform.')
-flags.DEFINE_integer('initial_collect_steps', 100,
+flags.DEFINE_integer('initial_collect_steps', 1000,
                      'Number of steps to collect at the beginning of training using random policy')
 flags.DEFINE_integer('collect_steps_per_iteration', 1,
                      'Number of steps to collect and be added to the replay buffer after every training iteration')
@@ -77,27 +78,27 @@ flags.DEFINE_integer('num_parallel_environments', 1,
                      'Number of environments to run in parallel')
 flags.DEFINE_integer('num_parallel_environments_eval', 1,
                      'Number of environments to run in parallel for eval')
-flags.DEFINE_integer('replay_buffer_capacity', 50000,
+flags.DEFINE_integer('replay_buffer_capacity', 1000000,
                      'Replay buffer capacity per env.')
 flags.DEFINE_integer('train_steps_per_iteration', 1,
                      'Number of training steps in every training iteration')
-flags.DEFINE_integer('batch_size', 64,
+flags.DEFINE_integer('batch_size', 256,
                      'Batch size for each training step. '
                      'For each training iteration, we first collect collect_steps_per_iteration steps to the '
                      'replay buffer. Then we sample batch_size steps from the replay buffer and train the model'
                      'for train_steps_per_iteration times.')
 flags.DEFINE_float('gamma', 0.99,
                    'Discount_factor for the environment')
-flags.DEFINE_float('actor_learning_rate', 1e-3,
+flags.DEFINE_float('actor_learning_rate', 3e-4,
                    'Actor learning rate')
-flags.DEFINE_float('critic_learning_rate', 1e-3,
+flags.DEFINE_float('critic_learning_rate', 3e-4,
                    'Critic learning rate')
-flags.DEFINE_float('alpha_learning_rate', 1e-3,
+flags.DEFINE_float('alpha_learning_rate', 3e-4,
                    'Alpha learning rate')
 
 flags.DEFINE_integer('num_eval_episodes', 10,
                      'The number of episodes to run eval on.')
-flags.DEFINE_integer('eval_interval', 1000,
+flags.DEFINE_integer('eval_interval', 10000,
                      'Run eval every eval_interval train steps')
 flags.DEFINE_boolean('eval_only', False,
                      'Whether to run evaluation only on trained checkpoints')
@@ -133,6 +134,7 @@ flags.DEFINE_boolean('fixed_obstacles', False,
                      'Whether to use the fixed obstacles environment')
 flags.DEFINE_boolean('random_obstacles', False,
                      'Whether to use the random obstacles environment')
+
 flags.DEFINE_boolean('pedestrians', False,
                      'Whether to use the pedestrians environment')
 
@@ -160,27 +162,28 @@ def train_eval(
         env_load_fn=None,
         model_ids=None,
         eval_env_mode='headless',
-        num_iterations=500000,
-        conv_layer_params=None,
+        num_iterations=1000000,
+        conv_1d_layer_params=None,
+        conv_2d_layer_params=None,
         encoder_fc_layers=[256],
-        actor_fc_layers=[256],
+        actor_fc_layers=[256, 256],
         critic_obs_fc_layers=None,
         critic_action_fc_layers=None,
-        critic_joint_fc_layers=[256],
+        critic_joint_fc_layers=[256, 256],
         # Params for collect
-        initial_collect_steps=1000,
+        initial_collect_steps=10000,
         collect_steps_per_iteration=1,
         num_parallel_environments=1,
-        replay_buffer_capacity=50000,
+        replay_buffer_capacity=1000000,
         # Params for target update
         target_update_tau=0.005,
         target_update_period=1,
         # Params for train
         train_steps_per_iteration=1,
-        batch_size=64,
-        actor_learning_rate=1e-3,
-        critic_learning_rate=1e-3,
-        alpha_learning_rate=1e-3,
+        batch_size=256,
+        actor_learning_rate=3e-4,
+        critic_learning_rate=3e-4,
+        alpha_learning_rate=3e-4,
         td_errors_loss_fn=tf.compat.v1.losses.mean_squared_error,
         gamma=0.99,
         reward_scale_factor=1.0,
@@ -197,7 +200,7 @@ def train_eval(
         policy_checkpoint_interval=10000,
         rb_checkpoint_interval=50000,
         log_interval=100,
-        summary_interval=1000,
+        summary_interval=100,
         summaries_flush_secs=10,
         debug_summaries=False,
         summarize_grads_and_vars=False,
@@ -231,13 +234,13 @@ def train_eval(
         if model_ids is None:
             model_ids = [None] * num_parallel_environments
         else:
-            assert len(model_ids) == num_parallel_environments,\
+            assert len(model_ids) == num_parallel_environments, \
                 'model ids provided, but length not equal to num_parallel_environments'
 
         if model_ids_eval is None:
             model_ids_eval = [None] * num_parallel_environments_eval
         else:
-            assert len(model_ids_eval) == num_parallel_environments_eval,\
+            assert len(model_ids_eval) == num_parallel_environments_eval, \
                 'model ids eval provided, but length not equal to num_parallel_environments_eval'
 
         tf_py_env = [lambda model_id=model_ids[i]: env_load_fn(model_id, 'headless', gpu)
@@ -260,44 +263,32 @@ def train_eval(
         glorot_uniform_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
         preprocessing_layers = {
             # 'depth': tf.keras.Sequential(mlp_layers(
-            #     conv_layer_params=conv_layer_params,
+            #     conv_1d_layer_params=None,
+            #     conv_2d_layer_params=conv_2d_layer_params,
             #     fc_layer_params=encoder_fc_layers,
             #     kernel_initializer=glorot_uniform_initializer,
             # )),
-            #'sensor': tf.keras.Sequential(mlp_layers(
-            #    conv_layer_params=None,
-            #    fc_layer_params=encoder_fc_layers,
-            #    kernel_initializer=glorot_uniform_initializer,
-#            )),
-#             'pedestrian_position': tf.keras.Sequential(mlp_layers(
-#                 conv_layer_params=None,
-#                 fc_layer_params=encoder_fc_layers,
-#                 kernel_initializer=glorot_uniform_initializer,
-#             )),
-#             'pedestrian_velocity': tf.keras.Sequential(mlp_layers(
-#                 conv_layer_params=None,
-#                 fc_layer_params=encoder_fc_layers,
-#                 kernel_initializer=glorot_uniform_initializer,
-#             )),
-           # 'pedestrian_ttc': tf.keras.Sequential(mlp_layers(
-           #      conv_layer_params=None,
-           #      fc_layer_params=encoder_fc_layers,
-           #      kernel_initializer=glorot_uniform_initializer,
-           #  )),            
-#             'pedestrian': tf.keras.Sequential(mlp_layers(
-#                 conv_layer_params=None,
-#                 fc_layer_params=encoder_fc_layers,
-#                 kernel_initializer=glorot_uniform_initializer,
-#             )),
-            # 'scan': tf.keras.Sequential(mlp_layers(
-            #     conv_layer_params=None,
+            # 'rgb': tf.keras.Sequential(mlp_layers(
+            #     conv_1d_layer_params=None,
+            #     conv_2d_layer_params=conv_2d_layer_params,
             #     fc_layer_params=encoder_fc_layers,
             #     kernel_initializer=glorot_uniform_initializer,
             # )),
-            'concatenate': tf.keras.layers.Lambda(lambda x: x),
+            'scan': tf.keras.Sequential(mlp_layers(
+                conv_1d_layer_params=conv_1d_layer_params,
+                conv_2d_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+            'sensor': tf.keras.Sequential(mlp_layers(
+                conv_1d_layer_params=None,
+                conv_2d_layer_params=None,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            )),
+#            'concatenate': tf.keras.layers.Lambda(lambda x: x),            
         }
-        #preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
-        preprocessing_combiner = None
+        preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
 
         actor_net = actor_distribution_network.ActorDistributionNetwork(
             observation_spec,
@@ -425,7 +416,6 @@ def train_eval(
         with sess.as_default():
             # Initialize graph.
             train_checkpointer.initialize_or_restore(sess)
-            rb_checkpointer.initialize_or_restore(sess)
 
             if eval_only:
                 metric_utils.compute_summaries(
@@ -438,18 +428,19 @@ def train_eval(
                     tf_summaries=False,
                     log=True,
                 )
-                # episodes = eval_py_env.get_stored_episodes()
-                # episodes = [episode for sublist in episodes for episode in sublist][:num_eval_episodes]
-                # metrics = episode_utils.get_metrics(episodes)
-                # for key in sorted(metrics.keys()):
-                #     print(key, ':', metrics[key])
+                episodes = eval_py_env.get_stored_episodes()
+                episodes = [episode for sublist in episodes for episode in sublist][:num_eval_episodes]
+                metrics = episode_utils.get_metrics(episodes)
+                for key in sorted(metrics.keys()):
+                    print(key, ':', metrics[key])
 
-                # save_path = os.path.join(eval_dir, 'episodes.pkl')
-                # episode_utils.save(episodes, save_path)
+                save_path = os.path.join(eval_dir, 'episodes_eval.pkl')
+                episode_utils.save(episodes, save_path)
                 print('EVAL DONE')
                 return
 
             # Initialize training.
+            rb_checkpointer.initialize_or_restore(sess)
             sess.run(dataset_iterator.initializer)
             common.initialize_uninitialized_variables(sess)
             sess.run(init_agent_op)
@@ -495,16 +486,15 @@ def train_eval(
                 name='global_steps_per_sec', data=steps_per_second_ph,
                 step=global_step)
 
-            iterations_per_env = int(num_iterations)
-            for _ in range(iterations_per_env):
+            for _ in range(num_iterations):
                 start_time = time.time()
                 collect_call()
-                #print('collect:', time.time() - start_time, int(1.0 / (time.time() - start_time)))
+                # print('collect:', time.time() - start_time)
 
-                train_start_time = time.time()
+                # train_start_time = time.time()
                 for _ in range(train_steps_per_iteration):
                     total_loss, _ = train_step_call()
-                #print('train:', time.time() - train_start_time, int(1.0 / (time.time() - train_start_time)))
+                # print('train:', time.time() - train_start_time)
 
                 time_acc += time.time() - start_time
                 global_step_val = global_step_call()
@@ -538,20 +528,21 @@ def train_eval(
                         tf_summaries=True,
                         log=True,
                     )
-                    # with eval_summary_writer.as_default(), tf.compat.v2.summary.record_if(True):
-                    #     with tf.name_scope('Metrics/'):
-                    #         episodes = eval_py_env.get_stored_episodes()
-                    #         episodes = [episode for sublist in episodes for episode in sublist][:num_eval_episodes]
-                    #         metrics = episode_utils.get_metrics(episodes)
-                    #         for key in sorted(metrics.keys()):
-                    #             print(key, ':', metrics[key])
-                    #             metric_op = tf.compat.v2.summary.scalar(name=key,
-                    #                                                     data=metrics[key],
-                    #                                                     step=global_step_val)
-                    #             sess.run(metric_op)
+                    with eval_summary_writer.as_default(), tf.compat.v2.summary.record_if(True):
+                        with tf.name_scope('Metrics/'):
+                            episodes = eval_py_env.get_stored_episodes()
+                            episodes = [episode for sublist in episodes for episode in sublist][:num_eval_episodes]
+                            metrics = episode_utils.get_metrics(episodes)
+                            for key in sorted(metrics.keys()):
+                                print(key, ':', metrics[key])
+                                metric_op = tf.compat.v2.summary.scalar(name=key,
+                                                                        data=metrics[key],
+                                                                        step=global_step_val)
+                                sess.run(metric_op)
                     sess.run(eval_summary_flush_op)
 
         sess.close()
+
 
 def main(_):
     tf.compat.v1.enable_resource_variables()
@@ -560,17 +551,18 @@ def main(_):
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.gpu_c)
 
-    #goal_fc_layers = [256]
-    conv_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
-    encoder_fc_layers = [1024, 512, 256]
-    actor_fc_layers = [1024, 512, 256]
-    critic_obs_fc_layers = [1024, 512, 256]
-    critic_action_fc_layers = [1024, 512, 256]
-    critic_joint_fc_layers = [1024, 512, 256]    
+    conv_1d_layer_params = [(32, 8, 4), (64, 4, 2), (64, 3, 1)]
+    conv_2d_layer_params = [(32, (8, 8), 4), (64, (4, 4), 2), (64, (3, 3), 1)]
+    encoder_fc_layers = [256]
+    actor_fc_layers = [256]
+    critic_obs_fc_layers = [256]
+    critic_action_fc_layers = [256]
+    critic_joint_fc_layers = [256]
 
     for k, v in FLAGS.flag_values_dict().items():
         print(k, v)
-    print('conv_layer_params', conv_layer_params)
+    print('conv_1d_layer_params', conv_1d_layer_params)
+    print('conv_2d_layer_params', conv_2d_layer_params)
     print('encoder_fc_layers', encoder_fc_layers)
     print('actor_fc_layers', actor_fc_layers)
     print('critic_obs_fc_layers', critic_obs_fc_layers)
@@ -598,7 +590,8 @@ def main(_):
         model_ids=FLAGS.model_ids,
         eval_env_mode=FLAGS.env_mode,
         num_iterations=FLAGS.num_iterations,
-        conv_layer_params=conv_layer_params,
+        conv_1d_layer_params=conv_1d_layer_params,
+        conv_2d_layer_params=conv_2d_layer_params,
         encoder_fc_layers=encoder_fc_layers,
         actor_fc_layers=actor_fc_layers,
         critic_obs_fc_layers=critic_obs_fc_layers,
