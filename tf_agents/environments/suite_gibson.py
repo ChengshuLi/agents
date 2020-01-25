@@ -120,6 +120,19 @@ def load(config_file,
                                        eval=env_mode == 'gui',
                                        arena='obstacles',
                                        )
+    elif env_type == 'ig_s2r_mp_semantic_obstacles':
+        env = MotionPlanningBaseArmEnv(config_file=config_file,
+                                       model_id=model_id,
+                                       collision_reward_weight=collision_reward_weight,
+                                       mode=env_mode,
+                                       action_timestep=1 / 500.0,
+                                       physics_timestep=1 / 500.0,
+                                       device_idx=device_idx,
+                                       eval=env_mode == 'gui',
+                                       arena='semantic_obstacles',
+                                       )
+    else:
+        assert False, 'unknown env_type: {}'.format(env_type)
 
     discount = env.discount_factor
     max_episode_steps = env.max_step

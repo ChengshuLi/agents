@@ -189,9 +189,9 @@ def train_eval(
         num_parallel_environments_eval=1,
         model_ids_eval=None,
         # Params for summaries and logging
-        train_checkpoint_interval=10000,
-        policy_checkpoint_interval=10000,
-        rb_checkpoint_interval=50000,
+        train_checkpoint_interval=1000,
+        policy_checkpoint_interval=1000,
+        rb_checkpoint_interval=5000,
         log_interval=100,
         summary_interval=100,
         summaries_flush_secs=10,
