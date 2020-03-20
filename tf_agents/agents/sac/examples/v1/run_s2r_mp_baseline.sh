@@ -9,12 +9,12 @@ col="0.0"
 run="0"
 lr="3e-4"
 
-log_dir="test_s2r_candcenter_push_door_baseline_test"
+log_dir="test_s2r_avonia_gates_empty_baseline_rerun"
 echo $log_dir
 
 #python -u train_eval.py \
 #    --root_dir $log_dir \
-#    --env_type ig_s2r_mp_push_door_baseline \
+#    --env_type ig_s2r_mp_empty_baseline \
 #    --config_file $config_file \
 #    --initial_collect_steps 200 \
 #    --collect_steps_per_iteration 1 \
@@ -36,10 +36,10 @@ echo $log_dir
 
 nohup python -u train_eval.py \
     --root_dir $log_dir \
-    --env_type ig_s2r_mp_push_door_baseline \
+    --env_type ig_s2r_mp_empty_baseline \
     --config_file $config_file \
     --initial_collect_steps 200 \
-    --collect_steps_per_iteration 1 \
+    --collect_steps_per_iteration 30 \
     --batch_size 256 \
     --train_steps_per_iteration 1 \
     --replay_buffer_capacity 10000 \
@@ -51,4 +51,8 @@ nohup python -u train_eval.py \
     --actor_learning_rate $lr \
     --critic_learning_rate $lr \
     --alpha_learning_rate $lr \
+    --model_ids Avonia,Avonia,Avonia,Avonia,gates_jan20,gates_jan20,gates_jan20,gates_jan20 \
     --collision_reward_weight $col > $log_dir".log"
+
+#    --model_ids Avonia,Avonia,Avonia,candcenter,candcenter,candcenter,gates_jan20,gates_jan20 \
+#    --model_ids Avonia,Avonia,Avonia,Avonia,gates_jan20,gates_jan20,gates_jan20,gates_jan20 \

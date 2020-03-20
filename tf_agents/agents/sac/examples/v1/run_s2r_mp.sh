@@ -4,24 +4,25 @@ gpu_c="1"
 gpu_g="0"
 algo="sac"
 robot="fetch"
-config_file="../examples/configs/"$robot"_interactive_nav_s2r_mp.yaml"
+sensor="rgb_depth_scan"
+config_file="../examples/configs/"$robot"_interactive_nav_s2r_mp_"$sensor".yaml"
 col="0.0"
 run="0"
 lr="3e-4"
 
-log_dir="test_s2r_candcenter_empty_goal_geo_dist"
+log_dir="test_s2r_random_manip_"$sensor
 echo $log_dir
 
 python -u train_eval.py \
     --root_dir $log_dir \
-    --env_type ig_s2r_mp_empty \
+    --env_type ig_s2r_mp_random_manip \
     --config_file $config_file \
     --initial_collect_steps 200 \
     --collect_steps_per_iteration 1 \
     --batch_size 256 \
     --train_steps_per_iteration 1 \
     --replay_buffer_capacity 10000 \
-    --num_eval_episodes 100 \
+    --num_eval_episodes 1000 \
     --eval_interval 10000000 \
     --gpu_c $gpu_c \
     --gpu_g $gpu_g \
@@ -31,12 +32,11 @@ python -u train_eval.py \
     --alpha_learning_rate $lr \
     --collision_reward_weight $col \
     --eval_only \
-    --env_mode "gui"
-exit
+    --env_mode gui
 
 nohup python -u train_eval.py \
     --root_dir $log_dir \
-    --env_type ig_s2r_mp_push_door \
+    --env_type ig_s2r_mp_random_manip \
     --config_file $config_file \
     --initial_collect_steps 200 \
     --collect_steps_per_iteration 1 \
@@ -47,7 +47,7 @@ nohup python -u train_eval.py \
     --eval_interval 10000000 \
     --gpu_c $gpu_c \
     --gpu_g $gpu_g \
-    --num_parallel_environments 8 \
+    --num_parallel_environments 10 \
     --actor_learning_rate $lr \
     --critic_learning_rate $lr \
     --alpha_learning_rate $lr \
