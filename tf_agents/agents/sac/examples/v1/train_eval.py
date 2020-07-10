@@ -108,7 +108,7 @@ flags.DEFINE_integer('gpu_c', 0,
                      'GPU id for compute, e.g. Tensorflow.')
 
 # Added for Gibson
-flags.DEFINE_string('config_file', '../test/test.yaml',
+flags.DEFINE_string('config_file', None,
                     'Config file for the experiment.')
 flags.DEFINE_list('model_ids', None,
                   'A comma-separated list of model ids to overwrite config_file.'
@@ -189,11 +189,11 @@ def train_eval(
         num_parallel_environments_eval=1,
         model_ids_eval=None,
         # Params for summaries and logging
-        train_checkpoint_interval=1000,
-        policy_checkpoint_interval=1000,
-        rb_checkpoint_interval=5000,
+        train_checkpoint_interval=10000,
+        policy_checkpoint_interval=10000,
+        rb_checkpoint_interval=50000,
         log_interval=100,
-        summary_interval=100,
+        summary_interval=1000,
         summaries_flush_secs=10,
         debug_summaries=False,
         summarize_grads_and_vars=False,
@@ -253,34 +253,59 @@ def train_eval(
         print('observation_spec', observation_spec)
         print('action_spec', action_spec)
 
+        occupancy_grid_conv_2d_layer_params = [
+            (32, (8, 8), 4),
+            (64, (4, 4), 2),
+            (64, (3, 3), 2),
+            (64, (3, 3), 2)
+        ]
+
         glorot_uniform_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
-        preprocessing_layers = {
-            'depth': tf.keras.Sequential(mlp_layers(
+        preprocessing_layers = {}
+        if 'rgb' in observation_spec:
+            preprocessing_layers['rgb'] = tf.keras.Sequential(mlp_layers(
                 conv_1d_layer_params=None,
                 conv_2d_layer_params=conv_2d_layer_params,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
-            )),
-            'rgb': tf.keras.Sequential(mlp_layers(
+            ))
+
+        if 'depth' in observation_spec:
+            preprocessing_layers['depth'] = tf.keras.Sequential(mlp_layers(
                 conv_1d_layer_params=None,
                 conv_2d_layer_params=conv_2d_layer_params,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
-            )),
-            'scan': tf.keras.Sequential(mlp_layers(
+            ))
+
+        if 'occupancy_grid' in observation_spec:
+            preprocessing_layers['occupancy_grid'] = tf.keras.Sequential(mlp_layers(
+                conv_1d_layer_params=None,
+                conv_2d_layer_params=occupancy_grid_conv_2d_layer_params,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            ))
+
+        if 'scan' in observation_spec:
+            preprocessing_layers['scan'] = tf.keras.Sequential(mlp_layers(
                 conv_1d_layer_params=conv_1d_layer_params,
                 conv_2d_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
-            )),
-            'sensor': tf.keras.Sequential(mlp_layers(
+            ))
+
+        if 'sensor' in observation_spec:
+            preprocessing_layers['sensor'] = tf.keras.Sequential(mlp_layers(
                 conv_1d_layer_params=None,
                 conv_2d_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
-            )),
-        }
-        preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
+            ))
+
+        if len(preprocessing_layers) <= 1:
+            preprocessing_combiner = None
+        else:
+            preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
 
         actor_net = actor_distribution_network.ActorDistributionNetwork(
             observation_spec,
