@@ -131,6 +131,28 @@ def load(config_file,
                                        eval=env_mode == 'gui',
                                        arena='semantic_obstacles',
                                        )
+    elif env_type == 'ig_s2r_mp_push_drawers':
+        env = MotionPlanningBaseArmEnv(config_file=config_file,
+                                       model_id=model_id,
+                                       collision_reward_weight=collision_reward_weight,
+                                       mode=env_mode,
+                                       action_timestep=1 / 500.0,
+                                       physics_timestep=1 / 500.0,
+                                       device_idx=device_idx,
+                                       eval=env_mode == 'gui',
+                                       arena='push_drawers',
+                                       )
+    elif env_type == 'ig_s2r_mp_push_chairs':
+        env = MotionPlanningBaseArmEnv(config_file=config_file,
+                                       model_id=model_id,
+                                       collision_reward_weight=collision_reward_weight,
+                                       mode=env_mode,
+                                       action_timestep=1 / 500.0,
+                                       physics_timestep=1 / 500.0,
+                                       device_idx=device_idx,
+                                       eval=env_mode == 'gui',
+                                       arena='push_chairs',
+                                       )
     elif env_type == 'ig_s2r_mp_empty':
         env = MotionPlanningBaseArmEnv(config_file=config_file,
                                        model_id=model_id,
