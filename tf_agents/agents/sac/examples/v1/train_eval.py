@@ -192,8 +192,8 @@ def train_eval(
         train_checkpoint_interval=2000,
         policy_checkpoint_interval=2000,
         rb_checkpoint_interval=10000,
-        log_interval=100,
-        summary_interval=1000,
+        log_interval=50,
+        summary_interval=50,
         summaries_flush_secs=10,
         debug_summaries=False,
         summarize_grads_and_vars=False,
@@ -238,13 +238,15 @@ def train_eval(
 
         tf_py_env = [lambda model_id=model_ids[i]: env_load_fn(model_id, 'headless', gpu)
                      for i in range(num_parallel_environments)]
-        tf_env = tf_py_environment.TFPyEnvironment(parallel_py_environment.ParallelPyEnvironment(tf_py_env))
+        tf_env = tf_py_environment.TFPyEnvironment(
+            parallel_py_environment.ParallelPyEnvironment(tf_py_env))
 
         if eval_env_mode == 'gui':
             assert num_parallel_environments_eval == 1, 'only one GUI env is allowed'
         eval_py_env = [lambda model_id=model_ids_eval[i]: env_load_fn(model_id, eval_env_mode, gpu)
                        for i in range(num_parallel_environments_eval)]
-        eval_py_env = parallel_py_environment.ParallelPyEnvironment(eval_py_env)
+        eval_py_env = parallel_py_environment.ParallelPyEnvironment(
+            eval_py_env)
 
         # Get the data specs from the environment
         time_step_spec = tf_env.time_step_spec()
@@ -360,7 +362,8 @@ def train_eval(
         replay_observer = [replay_buffer.add_batch]
 
         if eval_deterministic:
-            eval_py_policy = py_tf_policy.PyTFPolicy(greedy_policy.GreedyPolicy(tf_agent.policy))
+            eval_py_policy = py_tf_policy.PyTFPolicy(
+                greedy_policy.GreedyPolicy(tf_agent.policy))
         else:
             eval_py_policy = py_tf_policy.PyTFPolicy(tf_agent.policy)
 
@@ -378,7 +381,8 @@ def train_eval(
         ]
 
         collect_policy = tf_agent.collect_policy
-        initial_collect_policy = random_tf_policy.RandomTFPolicy(time_step_spec, action_spec)
+        initial_collect_policy = random_tf_policy.RandomTFPolicy(
+            time_step_spec, action_spec)
 
         initial_collect_op = dynamic_step_driver.DynamicStepDriver(
             tf_env,
@@ -401,7 +405,8 @@ def train_eval(
             sample_batch_size=5 * batch_size,
             num_steps=2).apply(tf.data.experimental.unbatch()).filter(
             _filter_invalid_transition).batch(batch_size).prefetch(5)
-        dataset_iterator = tf.compat.v1.data.make_initializable_iterator(dataset)
+        dataset_iterator = tf.compat.v1.data.make_initializable_iterator(
+            dataset)
         trajectories, unused_info = dataset_iterator.get_next()
         train_op = tf_agent.train(trajectories)
 
@@ -448,7 +453,8 @@ def train_eval(
                     log=True,
                 )
                 episodes = eval_py_env.get_stored_episodes()
-                episodes = [episode for sublist in episodes for episode in sublist][:num_eval_episodes]
+                episodes = [
+                    episode for sublist in episodes for episode in sublist][:num_eval_episodes]
                 metrics = episode_utils.get_metrics(episodes)
                 for key in sorted(metrics.keys()):
                     print(key, ':', metrics[key])
@@ -518,8 +524,10 @@ def train_eval(
                 time_acc += time.time() - start_time
                 global_step_val = global_step_call()
                 if global_step_val % log_interval == 0:
-                    logging.info('step = %d, loss = %f', global_step_val, total_loss.loss)
-                    steps_per_sec = (global_step_val - timed_at_step) / time_acc
+                    logging.info('step = %d, loss = %f',
+                                 global_step_val, total_loss.loss)
+                    steps_per_sec = (global_step_val -
+                                     timed_at_step) / time_acc
                     logging.info('%.3f steps/sec', steps_per_sec)
                     sess.run(
                         steps_per_second_summary,
@@ -550,7 +558,8 @@ def train_eval(
                     with eval_summary_writer.as_default(), tf.compat.v2.summary.record_if(True):
                         with tf.name_scope('Metrics/'):
                             episodes = eval_py_env.get_stored_episodes()
-                            episodes = [episode for sublist in episodes for episode in sublist][:num_eval_episodes]
+                            episodes = [
+                                episode for sublist in episodes for episode in sublist][:num_eval_episodes]
                             metrics = episode_utils.get_metrics(episodes)
                             for key in sorted(metrics.keys()):
                                 print(key, ':', metrics[key])
