@@ -19,9 +19,7 @@ import gin
 from tf_agents.environments import gym_wrapper
 from tf_agents.environments import wrappers
 from gibson2.envs.locomotor_env import NavigateEnv, NavigateRandomEnv
-from gibson2.envs.locomotor_env import InteractiveGibsonNavigateEnv, InteractiveGibsonNavigateSim2RealEnv
-from gibson2.envs.motion_planner_env import MotionPlanningEnv, MotionPlanningBaseArmEnv, \
-    MotionPlanningBaseArmContinuousEnv
+from gibson2.envs.motion_planner_env import MotionPlanningBaseArmEnv, MotionPlanningBaseArmContinuousEnv
 import gibson2
 
 
@@ -54,29 +52,6 @@ def load(config_file,
                               action_timestep=action_timestep,
                               physics_timestep=physics_timestep,
                               device_idx=device_idx)
-    elif env_type == 'ig':
-        env = InteractiveGibsonNavigateEnv(config_file=config_file,
-                                           model_id=model_id,
-                                           collision_reward_weight=collision_reward_weight,
-                                           mode=env_mode,
-                                           action_timestep=action_timestep,
-                                           physics_timestep=physics_timestep,
-                                           device_idx=device_idx)
-    elif env_type =='ig_s2r':
-       env = InteractiveGibsonNavigateSim2RealEnv(config_file=config_file,
-                                                  model_id=model_id,
-                                                  collision_reward_weight=collision_reward_weight,
-                                                  mode=env_mode,
-                                                  action_timestep=action_timestep,
-                                                  physics_timestep=physics_timestep,
-                                                  device_idx=device_idx)
-    # elif env_type == 'mp':
-    #     env = MotionPlanningEnv(config_file=config_file,
-    #                             mode=env_mode,
-    #                             model_id=model_id,
-    #                             action_timestep=1e-8,
-    #                             physics_timestep=1e-8,
-    #                             device_idx=device_idx)
     elif env_type == 'ig_s2r_mp':
         env = MotionPlanningBaseArmEnv(config_file=config_file,
                                        model_id=model_id,
@@ -85,7 +60,6 @@ def load(config_file,
                                        action_timestep=1e-8,
                                        physics_timestep=1e-8,
                                        device_idx=device_idx,
-                                       eval=env_mode == 'gui',
                                        arena=None,
                                        )
     elif env_type == 'ig_s2r_mp_button_door':
@@ -96,7 +70,6 @@ def load(config_file,
                                        action_timestep=1 / 500.0,
                                        physics_timestep=1 / 500.0,
                                        device_idx=device_idx,
-                                       eval=env_mode == 'gui',
                                        arena='button_door',
                                        )
     elif env_type == 'ig_s2r_mp_push_door':
@@ -107,7 +80,6 @@ def load(config_file,
                                        action_timestep=1 / 500.0,
                                        physics_timestep=1 / 500.0,
                                        device_idx=device_idx,
-                                       eval=env_mode == 'gui',
                                        arena='push_door',
                                        )
     elif env_type == 'ig_s2r_mp_obstacles':
@@ -118,7 +90,6 @@ def load(config_file,
                                        action_timestep=1 / 500.0,
                                        physics_timestep=1 / 500.0,
                                        device_idx=device_idx,
-                                       eval=env_mode == 'gui',
                                        arena='obstacles',
                                        )
     elif env_type == 'ig_s2r_mp_semantic_obstacles':
@@ -129,8 +100,27 @@ def load(config_file,
                                        action_timestep=1 / 500.0,
                                        physics_timestep=1 / 500.0,
                                        device_idx=device_idx,
-                                       eval=env_mode == 'gui',
                                        arena='semantic_obstacles',
+                                       )
+    elif env_type == 'ig_s2r_mp_push_drawers':
+        env = MotionPlanningBaseArmEnv(config_file=config_file,
+                                       model_id=model_id,
+                                       collision_reward_weight=collision_reward_weight,
+                                       mode=env_mode,
+                                       action_timestep=1 / 500.0,
+                                       physics_timestep=1 / 500.0,
+                                       device_idx=device_idx,
+                                       arena='push_drawers',
+                                       )
+    elif env_type == 'ig_s2r_mp_push_chairs':
+        env = MotionPlanningBaseArmEnv(config_file=config_file,
+                                       model_id=model_id,
+                                       collision_reward_weight=collision_reward_weight,
+                                       mode=env_mode,
+                                       action_timestep=1 / 500.0,
+                                       physics_timestep=1 / 500.0,
+                                       device_idx=device_idx,
+                                       arena='push_chairs',
                                        )
     elif env_type == 'ig_s2r_mp_empty':
         env = MotionPlanningBaseArmEnv(config_file=config_file,
@@ -140,7 +130,6 @@ def load(config_file,
                                        action_timestep=1 / 500.0,
                                        physics_timestep=1 / 500.0,
                                        device_idx=device_idx,
-                                       eval=env_mode == 'gui',
                                        arena='empty',
                                        )
     elif env_type == 'ig_s2r_mp_random_nav':
@@ -151,7 +140,6 @@ def load(config_file,
                                        action_timestep=1 / 500.0,
                                        physics_timestep=1 / 500.0,
                                        device_idx=device_idx,
-                                       eval=env_mode == 'gui',
                                        arena='random_nav',
                                        )
     elif env_type == 'ig_s2r_mp_random_manip':
@@ -162,7 +150,6 @@ def load(config_file,
                                        action_timestep=1 / 500.0,
                                        physics_timestep=1 / 500.0,
                                        device_idx=device_idx,
-                                       eval=env_mode == 'gui',
                                        arena='random_manip',
                                        )
     elif env_type == 'ig_s2r_mp_random_manip_atomic':
@@ -184,7 +171,6 @@ def load(config_file,
                                                  action_timestep=1 / 10.0,
                                                  physics_timestep=1 / 40.0,
                                                  device_idx=device_idx,
-                                                 eval=env_mode == 'gui',
                                                  arena='button_door',
                                                  )
     elif env_type == 'ig_s2r_mp_push_door_baseline':
@@ -195,7 +181,6 @@ def load(config_file,
                                                  action_timestep=1 / 10.0,
                                                  physics_timestep=1 / 40.0,
                                                  device_idx=device_idx,
-                                                 eval=env_mode == 'gui',
                                                  arena='push_door',
                                                  )
     elif env_type == 'ig_s2r_mp_obstacles_baseline':
@@ -206,7 +191,6 @@ def load(config_file,
                                                  action_timestep=1 / 10.0,
                                                  physics_timestep=1 / 40.0,
                                                  device_idx=device_idx,
-                                                 eval=env_mode == 'gui',
                                                  arena='obstacles',
                                                  )
     elif env_type == 'ig_s2r_mp_semantic_obstacles_baseline':
@@ -217,7 +201,6 @@ def load(config_file,
                                                  action_timestep=1 / 10.0,
                                                  physics_timestep=1 / 40.0,
                                                  device_idx=device_idx,
-                                                 eval=env_mode == 'gui',
                                                  arena='semantic_obstacles',
                                                  )
     elif env_type == 'ig_s2r_mp_empty_baseline':
@@ -228,7 +211,6 @@ def load(config_file,
                                                  action_timestep=1 / 10.0,
                                                  physics_timestep=1 / 40.0,
                                                  device_idx=device_idx,
-                                                 eval=env_mode == 'gui',
                                                  arena='empty',
                                                  )
     else:
