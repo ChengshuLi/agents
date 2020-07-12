@@ -165,6 +165,17 @@ def load(config_file,
                                        eval=env_mode == 'gui',
                                        arena='random_manip',
                                        )
+    elif env_type == 'ig_s2r_mp_random_manip_atomic':
+        env = MotionPlanningBaseArmEnv(config_file=config_file,
+                                       model_id=model_id,
+                                       collision_reward_weight=collision_reward_weight,
+                                       mode=env_mode,
+                                       action_timestep=1 / 500.0,
+                                       physics_timestep=1 / 500.0,
+                                       device_idx=device_idx,
+                                       eval=env_mode == 'gui',
+                                       arena='random_manip_atomic',
+                                       )
     elif env_type == 'ig_s2r_mp_button_door_baseline':
         env = MotionPlanningBaseArmContinuousEnv(config_file=config_file,
                                                  model_id=model_id,

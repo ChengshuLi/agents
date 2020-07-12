@@ -171,6 +171,7 @@ class InferenceEngine(object):
     def __init__(
         self,
         root_dir,
+        obs_keys=['sensor', 'rgb', 'depth', 'scan'],
         conv_1d_layer_params=None,
         conv_2d_layer_params=None,
         encoder_fc_layers=[256],
@@ -196,32 +197,33 @@ class InferenceEngine(object):
         summarize_grads_and_vars=False
     ):
         '''A simple train and eval for SAC.'''
-
-
-
-
         root_dir = os.path.expanduser(root_dir)
         train_dir = os.path.join(root_dir, 'train')
+        policy_dir = os.path.join(root_dir, 'train', 'policy')
 
+        obs_spec = collections.OrderedDict({})
+        if 'sensor' in obs_keys:
+            obs_spec['sensor'] = BoundedTensorSpec(shape=(22,), dtype=tf.float32, name=None,
+                                                   minimum=np.array(-3.4028235e+38, dtype=np.float32),
+                                                   maximum=np.array(3.4028235e+38, dtype=np.float32))
+        if 'rgb' in obs_keys:
+            obs_spec['rgb'] = BoundedTensorSpec(shape=(96, 128, 3), dtype=tf.float32, name=None,
+                                               minimum=np.array(-1.0, dtype=np.float32),
+                                               maximum=np.array(1.0, dtype=np.float32))
+        if 'depth' in obs_keys:
+            obs_spec['depth'] = BoundedTensorSpec(shape=(96, 128, 1), dtype=tf.float32, name=None,
+                                                  minimum=np.array(-1.0, dtype=np.float32),
+                                                  maximum=np.array(1.0, dtype=np.float32))
+        if 'scan' in obs_keys:
+            obs_spec['scan'] = BoundedTensorSpec(shape=(220, 1), dtype=tf.float32, name=None,
+                                                 minimum=np.array(-1.0, dtype=np.float32),
+                                                 maximum=np.array(1.0, dtype=np.float32))
         time_step_spec = TimeStep(
             TensorSpec(shape=(), dtype=tf.int32, name='step_type'),
             TensorSpec(shape=(), dtype=tf.float32, name='reward'),
             BoundedTensorSpec(shape=(), dtype=tf.float32, name='discount',
                               minimum=np.array(0., dtype=np.float32), maximum = np.array(1., dtype=np.float32)),
-            collections.OrderedDict({
-                'sensor': BoundedTensorSpec(shape=(22,), dtype=tf.float32, name=None,
-                                            minimum=np.array(-3.4028235e+38, dtype=np.float32),
-                                            maximum=np.array(3.4028235e+38, dtype=np.float32)),
-                'rgb': BoundedTensorSpec(shape=(96, 128, 3), dtype=tf.float32, name=None,
-                                         minimum=np.array(-1.0, dtype=np.float32),
-                                         maximum=np.array(1.0, dtype=np.float32)),
-                'depth': BoundedTensorSpec(shape=(96, 128, 1), dtype=tf.float32, name=None,
-                                           minimum=np.array(-1.0, dtype=np.float32),
-                                           maximum=np.array(1.0, dtype=np.float32)),
-                'scan': BoundedTensorSpec(shape=(220, 1), dtype=tf.float32, name=None,
-                                          minimum=np.array(-1.0, dtype=np.float32),
-                                          maximum=np.array(1.0, dtype=np.float32)),
-            })
+            obs_spec
         )
         observation_spec = time_step_spec.observation
         action_spec = BoundedTensorSpec(shape=(8,), dtype=tf.float32, name=None,
@@ -229,28 +231,44 @@ class InferenceEngine(object):
                                         maximum=np.array(1.0, dtype=np.float32))
 
         glorot_uniform_initializer = tf.compat.v1.keras.initializers.glorot_uniform()
-        preprocessing_layers = {
-            'depth': tf.keras.Sequential(mlp_layers(
+
+        preprocessing_layers = {}
+        if 'rgb' in observation_spec:
+            preprocessing_layers['rgb'] = tf.keras.Sequential(mlp_layers(
+                conv_1d_layer_params=None,
                 conv_2d_layer_params=conv_2d_layer_params,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
-            )),
-            'rgb': tf.keras.Sequential(mlp_layers(
+            ))
+
+        if 'depth' in observation_spec:
+            preprocessing_layers['depth'] = tf.keras.Sequential(mlp_layers(
+                conv_1d_layer_params=None,
                 conv_2d_layer_params=conv_2d_layer_params,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
-            )),
-           'scan': tf.keras.Sequential(mlp_layers(
+            ))
+
+        if 'scan' in observation_spec:
+            preprocessing_layers['scan'] = tf.keras.Sequential(mlp_layers(
                 conv_1d_layer_params=conv_1d_layer_params,
+                conv_2d_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
-            )),
-            'sensor': tf.keras.Sequential(mlp_layers(
+            ))
+
+        if 'sensor' in observation_spec:
+            preprocessing_layers['sensor'] = tf.keras.Sequential(mlp_layers(
+                conv_1d_layer_params=None,
+                conv_2d_layer_params=None,
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
-            )),
-        }
-        preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
+            ))
+
+        if len(preprocessing_layers) <= 1:
+            preprocessing_combiner = None
+        else:
+            preprocessing_combiner = tf.keras.layers.Concatenate(axis=-1)
 
         actor_net = actor_distribution_network.ActorDistributionNetwork(
             observation_spec,
@@ -319,24 +337,33 @@ class InferenceEngine(object):
         trajectories, unused_info = dataset_iterator.get_next()
         train_op = tf_agent.train(trajectories)
 
-        train_checkpointer = common.Checkpointer(
-            ckpt_dir=train_dir,
-            agent=tf_agent,
-            global_step=global_step)
+        #train_checkpointer = common.Checkpointer(
+        #    ckpt_dir=train_dir,
+        #    agent=tf_agent,
+        #    global_step=global_step)
+        policy_checkpointer = common.Checkpointer(
+            ckpt_dir=policy_dir,
+            policy=tf_agent.policy,
+            global_step=global_step
+        )
 
         with sess.as_default():
             # Initialize graph.
-            train_checkpointer.initialize_or_restore(sess)
+            #train_checkpointer.initialize_or_restore(sess)
+            policy_checkpointer.initialize_or_restore(sess)
 
         self.sess = sess
         self.eval_py_policy = eval_py_policy
 
-        obs = {
-            'depth': np.ones((1, 96, 128, 1)),
-            'rgb': np.ones((1, 96, 128, 3)),
-            'scan': np.ones((1, 220, 1)),
-            'sensor': np.ones((1, 22))
-        }
+        obs = {}
+        if 'sensor' in observation_spec:
+            obs['sensor'] = np.zeros((1, 22))
+        if 'rgb' in observation_spec:
+            obs['rgb'] = np.zeros((1, 96, 128, 3))
+        if 'depth' in observaiton_spec:
+            obs['depth'] = np.zeros((1, 96, 128, 1))
+        if 'scan' in observation_spec:
+            obs['scan'] = np.zeros((1, 220, 1))
 
         # activate the session
         self.inference(obs)
