@@ -24,7 +24,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-log_dir="/result/test_s2r_sac_$arena_$seed"
+log_dir="/result/test_s2r_sac_$arena-$seed"
 echo $log_dir
 echo $seed
 echo $arena
