@@ -8,18 +8,19 @@ config_file="../examples/configs/"$robot"_interactive_nav_s2r_mp_continuous.yaml
 col="0.0"
 lr="3e-4"
 gamma="0.9995"
-task="push_door"
+env_type="ig_s2r_baseline"
+
+arena="push_door"
 run="0"
 
-log_dir="/result/flat_rl_baseline_"$task"_"$run
-env_type="ig_s2r_mp_"$task"_baseline"
-echo $log_dir
-echo $env_type
+log_dir="/result/flat_rl_baseline_"$arena"_"$run
 mkdir -p $log_dir
+echo $log_dir
 
 nohup python -u train_eval.py \
     --root_dir $log_dir \
     --env_type $env_type \
+    --arena $arena \
     --config_file $config_file \
     --initial_collect_steps 200 \
     --collect_steps_per_iteration 30 \

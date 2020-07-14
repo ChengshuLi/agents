@@ -19,7 +19,8 @@ import gin
 from tf_agents.environments import gym_wrapper
 from tf_agents.environments import wrappers
 from gibson2.envs.locomotor_env import NavigateEnv, NavigateRandomEnv
-from gibson2.envs.motion_planner_env import MotionPlanningBaseArmEnv, MotionPlanningBaseArmContinuousEnv
+from gibson2.envs.motion_planner_env import MotionPlanningBaseArmEnv
+from gibson2.envs.motion_planner_env import MotionPlanningBaseArmContinuousEnv
 import gibson2
 
 
@@ -28,6 +29,7 @@ def load(config_file,
          model_id=None,
          collision_reward_weight=0.0,
          env_type='gibson',
+         arena='push_door',
          env_mode='headless',
          action_timestep=1.0 / 10.0,
          physics_timestep=1.0 / 40.0,
@@ -40,179 +42,42 @@ def load(config_file,
     config_file = os.path.join(os.path.dirname(gibson2.__file__), config_file)
     if env_type == 'gibson':
         if random_position:
-            env = NavigateRandomEnv(config_file=config_file,
-                                    mode=env_mode,
-                                    action_timestep=action_timestep,
-                                    physics_timestep=physics_timestep,
-                                    device_idx=device_idx,
-                                    random_height=random_height)
+            env = NavigateRandomEnv(
+                config_file=config_file,
+                mode=env_mode,
+                action_timestep=action_timestep,
+                physics_timestep=physics_timestep,
+                device_idx=device_idx,
+                random_height=random_height)
         else:
-            env = NavigateEnv(config_file=config_file,
-                              mode=env_mode,
-                              action_timestep=action_timestep,
-                              physics_timestep=physics_timestep,
-                              device_idx=device_idx)
-    elif env_type == 'ig_s2r_mp':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1e-8,
-                                       physics_timestep=1e-8,
-                                       device_idx=device_idx,
-                                       arena=None,
-                                       )
-    elif env_type == 'ig_s2r_mp_button_door':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1 / 500.0,
-                                       physics_timestep=1 / 500.0,
-                                       device_idx=device_idx,
-                                       arena='button_door',
-                                       )
-    elif env_type == 'ig_s2r_mp_push_door':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1 / 500.0,
-                                       physics_timestep=1 / 500.0,
-                                       device_idx=device_idx,
-                                       arena='push_door',
-                                       )
-    elif env_type == 'ig_s2r_mp_obstacles':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1 / 500.0,
-                                       physics_timestep=1 / 500.0,
-                                       device_idx=device_idx,
-                                       arena='obstacles',
-                                       )
-    elif env_type == 'ig_s2r_mp_semantic_obstacles':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1 / 500.0,
-                                       physics_timestep=1 / 500.0,
-                                       device_idx=device_idx,
-                                       arena='semantic_obstacles',
-                                       )
-    elif env_type == 'ig_s2r_mp_push_drawers':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1 / 500.0,
-                                       physics_timestep=1 / 500.0,
-                                       device_idx=device_idx,
-                                       arena='push_drawers',
-                                       )
-    elif env_type == 'ig_s2r_mp_push_chairs':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1 / 500.0,
-                                       physics_timestep=1 / 500.0,
-                                       device_idx=device_idx,
-                                       arena='push_chairs',
-                                       )
-    elif env_type == 'ig_s2r_mp_empty':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1 / 500.0,
-                                       physics_timestep=1 / 500.0,
-                                       device_idx=device_idx,
-                                       arena='empty',
-                                       )
-    elif env_type == 'ig_s2r_mp_random_nav':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1 / 500.0,
-                                       physics_timestep=1 / 500.0,
-                                       device_idx=device_idx,
-                                       arena='random_nav',
-                                       )
-    elif env_type == 'ig_s2r_mp_random_manip':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1 / 500.0,
-                                       physics_timestep=1 / 500.0,
-                                       device_idx=device_idx,
-                                       arena='random_manip',
-                                       )
-    elif env_type == 'ig_s2r_mp_random_manip_atomic':
-        env = MotionPlanningBaseArmEnv(config_file=config_file,
-                                       model_id=model_id,
-                                       collision_reward_weight=collision_reward_weight,
-                                       mode=env_mode,
-                                       action_timestep=1 / 500.0,
-                                       physics_timestep=1 / 500.0,
-                                       device_idx=device_idx,
-                                       eval=env_mode == 'gui',
-                                       arena='random_manip_atomic',
-                                       )
-    elif env_type == 'ig_s2r_mp_button_door_baseline':
-        env = MotionPlanningBaseArmContinuousEnv(config_file=config_file,
-                                                 model_id=model_id,
-                                                 collision_reward_weight=collision_reward_weight,
-                                                 mode=env_mode,
-                                                 action_timestep=1 / 10.0,
-                                                 physics_timestep=1 / 40.0,
-                                                 device_idx=device_idx,
-                                                 arena='button_door',
-                                                 )
-    elif env_type == 'ig_s2r_mp_push_door_baseline':
-        env = MotionPlanningBaseArmContinuousEnv(config_file=config_file,
-                                                 model_id=model_id,
-                                                 collision_reward_weight=collision_reward_weight,
-                                                 mode=env_mode,
-                                                 action_timestep=1 / 10.0,
-                                                 physics_timestep=1 / 40.0,
-                                                 device_idx=device_idx,
-                                                 arena='push_door',
-                                                 )
-    elif env_type == 'ig_s2r_mp_obstacles_baseline':
-        env = MotionPlanningBaseArmContinuousEnv(config_file=config_file,
-                                                 model_id=model_id,
-                                                 collision_reward_weight=collision_reward_weight,
-                                                 mode=env_mode,
-                                                 action_timestep=1 / 10.0,
-                                                 physics_timestep=1 / 40.0,
-                                                 device_idx=device_idx,
-                                                 arena='obstacles',
-                                                 )
-    elif env_type == 'ig_s2r_mp_semantic_obstacles_baseline':
-        env = MotionPlanningBaseArmContinuousEnv(config_file=config_file,
-                                                 model_id=model_id,
-                                                 collision_reward_weight=collision_reward_weight,
-                                                 mode=env_mode,
-                                                 action_timestep=1 / 10.0,
-                                                 physics_timestep=1 / 40.0,
-                                                 device_idx=device_idx,
-                                                 arena='semantic_obstacles',
-                                                 )
-    elif env_type == 'ig_s2r_mp_empty_baseline':
-        env = MotionPlanningBaseArmContinuousEnv(config_file=config_file,
-                                                 model_id=model_id,
-                                                 collision_reward_weight=collision_reward_weight,
-                                                 mode=env_mode,
-                                                 action_timestep=1 / 10.0,
-                                                 physics_timestep=1 / 40.0,
-                                                 device_idx=device_idx,
-                                                 arena='empty',
-                                                 )
+            env = NavigateEnv(
+                config_file=config_file,
+                mode=env_mode,
+                action_timestep=action_timestep,
+                physics_timestep=physics_timestep,
+                device_idx=device_idx)
+    elif env_type == 'ig_s2r':
+        env = MotionPlanningBaseArmEnv(
+            config_file=config_file,
+            model_id=model_id,
+            collision_reward_weight=collision_reward_weight,
+            mode=env_mode,
+            action_timestep=1 / 500.0,
+            physics_timestep=1 / 500.0,
+            device_idx=device_idx,
+            arena=arena,
+        )
+    elif env_type == 'ig_s2r_baseline':
+        env = MotionPlanningBaseArmContinuousEnv(
+            config_file=config_file,
+            model_id=model_id,
+            collision_reward_weight=collision_reward_weight,
+            mode=env_mode,
+            action_timestep=1 / 10.0,
+            physics_timestep=1 / 40.0,
+            device_idx=device_idx,
+            arena=arena,
+        )
     else:
         assert False, 'unknown env_type: {}'.format(env_type)
 
@@ -241,7 +106,7 @@ def wrap_env(env,
              spec_dtype_map=None,
              auto_reset=True):
     for wrapper in gym_env_wrappers:
-        gym_env = wrapper(gym_env)
+        env = wrapper(env)
     env = gym_wrapper.GymWrapper(
         env,
         discount=discount,

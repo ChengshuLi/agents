@@ -121,7 +121,9 @@ flags.DEFINE_float('collision_reward_weight', 0.0,
 flags.DEFINE_string('env_mode', 'headless',
                     'Mode for the simulator (gui or headless)')
 flags.DEFINE_string('env_type', 'gibson',
-                    'Type for the Gibson environment (gibson or ig)')
+                    'Type for the Gibson environment (gibson, ig_s2r, ig_s2r_baseline)')
+flags.DEFINE_string('arena', 'push_door',
+                    'Type for arena for iGibson sim2real')
 flags.DEFINE_float('action_timestep', 1.0 / 10.0,
                    'Action timestep for the simulator')
 flags.DEFINE_float('physics_timestep', 1.0 / 40.0,
@@ -605,6 +607,7 @@ def main(_):
             model_id=model_id,
             collision_reward_weight=FLAGS.collision_reward_weight,
             env_type=FLAGS.env_type,
+            arena=FLAGS.arena,
             env_mode=mode,
             action_timestep=FLAGS.action_timestep,
             physics_timestep=FLAGS.physics_timestep,
