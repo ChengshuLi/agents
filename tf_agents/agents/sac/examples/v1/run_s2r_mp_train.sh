@@ -26,6 +26,10 @@ done
 
 log_dir="/result/test_s2r_sac_$arena_$seed"
 echo $log_dir
+echo $seed
+echo $arena
+echo $gpu_c
+echo $gpu_g
 
 python -u train_eval.py \
     --root_dir $log_dir \
