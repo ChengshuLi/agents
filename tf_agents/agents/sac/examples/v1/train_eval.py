@@ -477,17 +477,17 @@ def train_eval(
             global_step_val = sess.run(global_step)
 
             if global_step_val == 0:
-                # Initial eval of randomly initialized policy
-                metric_utils.compute_summaries(
-                    eval_metrics,
-                    eval_py_env,
-                    eval_py_policy,
-                    num_episodes=num_eval_episodes,
-                    global_step=0,
-                    callback=eval_metrics_callback,
-                    tf_summaries=True,
-                    log=True,
-                )
+                # # Initial eval of randomly initialized policy
+                # metric_utils.compute_summaries(
+                #     eval_metrics,
+                #     eval_py_env,
+                #     eval_py_policy,
+                #     num_episodes=num_eval_episodes,
+                #     global_step=0,
+                #     callback=eval_metrics_callback,
+                #     tf_summaries=True,
+                #     log=True,
+                # )
                 # Run initial collect.
                 logging.info('Global step %d: Running initial collect op.',
                              global_step_val)
@@ -546,30 +546,30 @@ def train_eval(
                 if global_step_val % rb_checkpoint_interval == 0:
                     rb_checkpointer.save(global_step=global_step_val)
 
-                if global_step_val % eval_interval == 0:
-                    metric_utils.compute_summaries(
-                        eval_metrics,
-                        eval_py_env,
-                        eval_py_policy,
-                        num_episodes=num_eval_episodes,
-                        global_step=0,
-                        callback=eval_metrics_callback,
-                        tf_summaries=True,
-                        log=True,
-                    )
-                    with eval_summary_writer.as_default(), tf.compat.v2.summary.record_if(True):
-                        with tf.name_scope('Metrics/'):
-                            episodes = eval_py_env.get_stored_episodes()
-                            episodes = [
-                                episode for sublist in episodes for episode in sublist][:num_eval_episodes]
-                            metrics = episode_utils.get_metrics(episodes)
-                            for key in sorted(metrics.keys()):
-                                print(key, ':', metrics[key])
-                                metric_op = tf.compat.v2.summary.scalar(name=key,
-                                                                        data=metrics[key],
-                                                                        step=global_step_val)
-                                sess.run(metric_op)
-                    sess.run(eval_summary_flush_op)
+                # if global_step_val % eval_interval == 0:
+                #     metric_utils.compute_summaries(
+                #         eval_metrics,
+                #         eval_py_env,
+                #         eval_py_policy,
+                #         num_episodes=num_eval_episodes,
+                #         global_step=0,
+                #         callback=eval_metrics_callback,
+                #         tf_summaries=True,
+                #         log=True,
+                #     )
+                #     with eval_summary_writer.as_default(), tf.compat.v2.summary.record_if(True):
+                #         with tf.name_scope('Metrics/'):
+                #             episodes = eval_py_env.get_stored_episodes()
+                #             episodes = [
+                #                 episode for sublist in episodes for episode in sublist][:num_eval_episodes]
+                #             metrics = episode_utils.get_metrics(episodes)
+                #             for key in sorted(metrics.keys()):
+                #                 print(key, ':', metrics[key])
+                #                 metric_op = tf.compat.v2.summary.scalar(name=key,
+                #                                                         data=metrics[key],
+                #                                                         step=global_step_val)
+                #                 sess.run(metric_op)
+                #     sess.run(eval_summary_flush_op)
 
         sess.close()
 
