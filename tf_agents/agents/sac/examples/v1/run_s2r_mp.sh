@@ -10,6 +10,7 @@ env_type="ig_s2r"
 gpu_c="1"
 gpu_g="0"
 model_ids="Avonia,Avonia,Avonia,candcenter,candcenter,candcenter,gates_jan20,gates_jan20,gates_jan20"
+model_ids_eval="Avonia"
 col="0.0"
 arena="push_door"
 seed="0"
@@ -59,4 +60,5 @@ python -u train_eval.py \
     --alpha_learning_rate $lr \
     --gamma $gamma \
     --model_ids $model_ids \
+    --model_ids_eval $model_ids_eval \
     --collision_reward_weight $col > $log_dir/log 2>&1
