@@ -7,6 +7,7 @@ robot="fetch"
 config_file="../examples/configs/"$robot"_interactive_nav_s2r_mp_continuous.yaml"
 col="0.0"
 lr="3e-4"
+gamma="0.9995"
 task="push_door"
 run="0"
 
@@ -34,6 +35,6 @@ nohup python -u train_eval.py \
     --actor_learning_rate $lr \
     --critic_learning_rate $lr \
     --alpha_learning_rate $lr \
+    --gamma $gamma \
     --model_ids Avonia,Avonia,Avonia,candcenter,candcenter,candcenter,gates_jan20,gates_jan20,gates_jan20 \
     --collision_reward_weight $col > $log_dir/log &
-
