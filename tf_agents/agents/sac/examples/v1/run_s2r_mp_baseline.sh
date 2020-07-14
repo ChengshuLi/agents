@@ -10,7 +10,7 @@ lr="3e-4"
 gamma="0.9995"
 env_type="ig_s2r_baseline"
 
-arena="push_door"
+arena="random_nav"
 run="0"
 
 log_dir="/result/flat_rl_baseline_"$arena"_"$run
