@@ -46,7 +46,7 @@ python -u train_eval.py \
     --arena $arena \
     --config_file $config_file \
     --initial_collect_steps 200 \
-    --collect_steps_per_iteration 30 \
+    --collect_steps_per_iteration 1 \
     --num_iterations 100000000 \
     --batch_size 256 \
     --train_steps_per_iteration 1 \
