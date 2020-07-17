@@ -608,6 +608,7 @@ def main(_):
             collision_reward_weight=FLAGS.collision_reward_weight,
             env_type=FLAGS.env_type,
             arena=FLAGS.arena,
+            log_dir=FLAGS.root_dir,
             env_mode=mode,
             action_timestep=FLAGS.action_timestep,
             physics_timestep=FLAGS.physics_timestep,

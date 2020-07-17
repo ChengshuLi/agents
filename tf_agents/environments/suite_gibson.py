@@ -30,6 +30,7 @@ def load(config_file,
          collision_reward_weight=0.0,
          env_type='gibson',
          arena='push_door',
+         log_dir=None,
          env_mode='headless',
          action_timestep=1.0 / 10.0,
          physics_timestep=1.0 / 40.0,
@@ -66,6 +67,7 @@ def load(config_file,
             physics_timestep=1 / 500.0,
             device_idx=device_idx,
             arena=arena,
+            log_dir=log_dir,
         )
     elif env_type == 'ig_s2r_baseline':
         env = MotionPlanningBaseArmContinuousEnv(
@@ -77,6 +79,7 @@ def load(config_file,
             physics_timestep=1 / 40.0,
             device_idx=device_idx,
             arena=arena,
+            log_dir=log_dir,
         )
     else:
         assert False, 'unknown env_type: {}'.format(env_type)
