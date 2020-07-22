@@ -14,6 +14,7 @@ model_ids_eval="Avonia"
 col="0.0"
 arena="push_door"
 seed="0"
+num_parallel="16"
 
 ### change default arguments
 while [[ "$#" -gt 0 ]]; do
@@ -25,6 +26,7 @@ while [[ "$#" -gt 0 ]]; do
         --col) col="$2"; shift ;;
         --arena) arena="$2"; shift ;;
         --seed) seed="$2"; shift ;;
+        --num_parallel) num_parallel="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -55,7 +57,7 @@ python -u train_eval.py \
     --eval_interval 100000000 \
     --gpu_c $gpu_c \
     --gpu_g $gpu_g \
-    --num_parallel_environments 9 \
+    --num_parallel_environments $num_parallel \
     --actor_learning_rate $lr \
     --critic_learning_rate $lr \
     --alpha_learning_rate $lr \
