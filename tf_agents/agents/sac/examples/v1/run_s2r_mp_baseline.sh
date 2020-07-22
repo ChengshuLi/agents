@@ -7,6 +7,12 @@ lr="3e-4"
 gamma="0.9995"
 env_type="ig_s2r_baseline"
 
+train_checkpoint_interval="30000"
+policy_checkpoint_interval="30000"
+rb_checkpoint_interval="150000"
+log_interval="750"
+summary_interval="750"
+
 gpu_c="1"
 gpu_g="0"
 model_ids="Avonia,Avonia,Avonia,candcenter,candcenter,candcenter,gates_jan20,gates_jan20,gates_jan20"
@@ -53,6 +59,11 @@ python -u train_eval.py \
     --batch_size 256 \
     --train_steps_per_iteration 1 \
     --replay_buffer_capacity 10000 \
+    --train_checkpoint_interval $train_checkpoint_interval \
+    --policy_checkpoint_interval $policy_checkpoint_interval \
+    --rb_checkpoint_interval $rb_checkpoint_interval \
+    --log_interval $log_interval \
+    --summary_interval $summary_interval \
     --num_eval_episodes 1 \
     --eval_interval 100000000 \
     --gpu_c $gpu_c \

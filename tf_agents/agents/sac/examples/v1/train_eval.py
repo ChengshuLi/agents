@@ -95,6 +95,16 @@ flags.DEFINE_float('critic_learning_rate', 3e-4,
                    'Critic learning rate')
 flags.DEFINE_float('alpha_learning_rate', 3e-4,
                    'Alpha learning rate')
+flags.DEFINE_integer('train_checkpoint_interval', 30000,
+                     'Train checkpoint interval')
+flags.DEFINE_integer('policy_checkpoint_interval', 30000,
+                     'Policy checkpoint interval')
+flags.DEFINE_integer('rb_checkpoint_interval', 150000,
+                     'Replay buffer checkpoint interval')
+flags.DEFINE_integer('log_interval', 750,
+                     'Log interval')
+flags.DEFINE_integer('summary_interval', 750,
+                     'TF summary interval')
 
 flags.DEFINE_integer('num_eval_episodes', 10,
                      'The number of episodes to run eval on.')
@@ -641,6 +651,11 @@ def main(_):
         eval_only=FLAGS.eval_only,
         num_parallel_environments_eval=FLAGS.num_parallel_environments_eval,
         model_ids_eval=FLAGS.model_ids_eval,
+        train_checkpoint_interval=FLAGS.train_checkpoint_interval,
+        policy_checkpoint_interval=FLAGS.policy_checkpoint_interval,
+        rb_checkpoint_interval=FLAGS.rb_checkpoint_interval,
+        log_interval=FLAGS.log_interval,
+        summary_interval=FLAGS.summary_interval,
     )
 
 
