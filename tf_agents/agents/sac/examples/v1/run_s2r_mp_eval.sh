@@ -1,54 +1,92 @@
 #!/bin/bash
 
-gpu_c="1"
-gpu_g="0"
 algo="sac"
 robot="fetch"
 config_file="../examples/configs/"$robot"_interactive_nav_s2r_mp.yaml"
-col="0.0"
-run="0"
 lr="3e-4"
+gamma="0.99"
+env_type="ig_s2r"
 
-log_dir="/result/test_s2r_Samuels_drawers"
-echo $log_dir
+train_checkpoint_interval="1000"
+policy_checkpoint_interval="1000"
+rb_checkpoint_interval="5000"
+log_interval="25"
+summary_interval="25"
+
+gpu_c="1"
+gpu_g="0"
+model_ids="candcenter"
+model_ids_eval="candcenter"
+col="0.0"
+arena="push_door"
+seed="0"
+num_parallel="1"
+log_dir="test"
+num_eval_episodes="100"
+env_mode="headless"
+fine_motion_plan="true"
+mp_algo="birrt"  # birrt | lazy_prm
+
+### change default arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --gpu_c) gpu_c="$2"; shift ;;
+        --gpu_g) gpu_g="$2"; shift ;;
+        --model_ids) model_ids="$2"; shift ;;
+        --model_ids_eval) model_ids_eval="$2"; shift ;;
+        --col) col="$2"; shift ;;
+        --arena) arena="$2"; shift ;;
+        --seed) seed="$2"; shift ;;
+        --log_dir) log_dir="$2"; shift ;;
+        --num_parallel) num_parallel="$2"; shift ;;
+        --num_eval_episodes) num_eval_episodes="$2"; shift ;;
+        --env_mode) env_mode="$2"; shift ;;
+        --fine_motion_plan) fine_motion_plan="$2"; shift ;;
+        --mp_algo) mp_algo="$2"; shift ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+echo "log_dir:" $log_dir
+echo "model_ids_eval:" $model_ids_eval
+echo "arena:" $arena
+echo "seed:" $seed
+echo "num_eval_episodes:" $num_eval_episodes
+echo "env_mode:" $env_mode
+echo "fine_motion_plan:" $fine_motion_plan
+echo "mp_algo:" $mp_algo
 
 python -u train_eval.py \
     --root_dir $log_dir \
-    --env_type ig_s2r_mp_push_drawers \
+    --env_type $env_type \
+    --arena $arena \
     --config_file $config_file \
-    --initial_collect_steps 20 \
+    --initial_collect_steps 200 \
     --collect_steps_per_iteration 1 \
+    --num_iterations 100000000 \
     --batch_size 256 \
     --train_steps_per_iteration 1 \
     --replay_buffer_capacity 10000 \
-    --num_eval_episodes 1 \
-    --eval_interval 10000000 \
+    --train_checkpoint_interval $train_checkpoint_interval \
+    --policy_checkpoint_interval $policy_checkpoint_interval \
+    --rb_checkpoint_interval $rb_checkpoint_interval \
+    --log_interval $log_interval \
+    --summary_interval $summary_interval \
+    --num_eval_episodes $num_eval_episodes \
+    --eval_interval 100000000 \
     --gpu_c $gpu_c \
     --gpu_g $gpu_g \
     --num_parallel_environments 1 \
+    --num_parallel_environments_eval $num_parallel \
     --actor_learning_rate $lr \
     --critic_learning_rate $lr \
     --alpha_learning_rate $lr \
-    --collision_reward_weight $col > $log_dir.log 2>&1
-exit
-
-#python -u train_eval.py \
-#    --root_dir $log_dir \
-#    --env_type ig_s2r_mp_button_door \
-#    --config_file $config_file \
-#    --initial_collect_steps 200 \
-#    --collect_steps_per_iteration 1 \
-#    --batch_size 256 \
-#    --train_steps_per_iteration 1 \
-#    --replay_buffer_capacity 10000 \
-#    --num_eval_episodes 100 \
-#    --eval_interval 10000000 \
-#    --gpu_c $gpu_c \
-#    --gpu_g $gpu_g \
-#    --num_parallel_environments 1 \
-#    --actor_learning_rate $lr \
-#    --critic_learning_rate $lr \
-#    --alpha_learning_rate $lr \
-#    --collision_reward_weight $col \
-#    --eval_only \
-#    --env_mode gui
+    --gamma $gamma \
+    --model_ids $model_ids \
+    --model_ids_eval $model_ids_eval \
+    --collision_reward_weight $col \
+    --fine_motion_plan $fine_motion_plan \
+    --mp_algo $mp_algo \
+    --env_mode $env_mode \
+    --eval_only

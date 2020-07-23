@@ -31,6 +31,8 @@ def load(config_file,
          env_type='gibson',
          arena='push_door',
          log_dir=None,
+         fine_motion_plan=None,
+         mp_algo='birrt',
          env_mode='headless',
          action_timestep=1.0 / 10.0,
          physics_timestep=1.0 / 40.0,
@@ -68,6 +70,8 @@ def load(config_file,
             device_idx=device_idx,
             arena=arena,
             log_dir=log_dir,
+            fine_motion_plan=fine_motion_plan,
+            mp_algo=mp_algo,
         )
     elif env_type == 'ig_s2r_baseline':
         env = MotionPlanningBaseArmContinuousEnv(

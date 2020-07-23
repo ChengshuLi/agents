@@ -142,6 +142,11 @@ flags.DEFINE_integer('gpu_g', 0,
                      'GPU id for graphics, e.g. Gibson.')
 flags.DEFINE_boolean('random_position', False,
                      'Whether to randomize initial and target position')
+flags.DEFINE_boolean('fine_motion_plan', None,
+                     'Whether to use fine motion planning')
+flags.DEFINE_string('mp_algo', 'birrt',
+                    'Motion planning algorithm')
+
 
 FLAGS = flags.FLAGS
 
@@ -619,6 +624,8 @@ def main(_):
             env_type=FLAGS.env_type,
             arena=FLAGS.arena,
             log_dir=FLAGS.root_dir,
+            fine_motion_plan=FLAGS.fine_motion_plan,
+            mp_algo=FLAGS.mp_algo,
             env_mode=mode,
             action_timestep=FLAGS.action_timestep,
             physics_timestep=FLAGS.physics_timestep,
