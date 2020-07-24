@@ -144,8 +144,10 @@ flags.DEFINE_boolean('random_position', False,
                      'Whether to randomize initial and target position')
 flags.DEFINE_boolean('fine_motion_plan', None,
                      'Whether to use fine motion planning')
-flags.DEFINE_string('mp_algo', 'birrt',
-                    'Motion planning algorithm')
+flags.DEFINE_string('base_mp_algo', 'birrt',
+                    'Base motion planning algorithm')
+flags.DEFINE_string('arm_mp_algo', 'birrt',
+                    'Arm motion planning algorithm')
 
 
 FLAGS = flags.FLAGS
@@ -219,6 +221,7 @@ def train_eval(
     root_dir = os.path.expanduser(root_dir)
     train_dir = os.path.join(root_dir, 'train')
     eval_dir = os.path.join(root_dir, 'eval')
+    # tf.compat.v1.set_random_seed(0)
 
     train_summary_writer = tf.compat.v2.summary.create_file_writer(
         train_dir, flush_millis=summaries_flush_secs * 1000)
@@ -378,6 +381,7 @@ def train_eval(
             max_length=replay_buffer_capacity)
         replay_observer = [replay_buffer.add_batch]
 
+        print('eval_deterministic', eval_deterministic)
         if eval_deterministic:
             eval_py_policy = py_tf_policy.PyTFPolicy(
                 greedy_policy.GreedyPolicy(tf_agent.policy))
@@ -625,7 +629,8 @@ def main(_):
             arena=FLAGS.arena,
             log_dir=FLAGS.root_dir,
             fine_motion_plan=FLAGS.fine_motion_plan,
-            mp_algo=FLAGS.mp_algo,
+            base_mp_algo=FLAGS.base_mp_algo,
+            arm_mp_algo=FLAGS.arm_mp_algo,
             env_mode=mode,
             action_timestep=FLAGS.action_timestep,
             physics_timestep=FLAGS.physics_timestep,
@@ -656,6 +661,7 @@ def main(_):
         num_eval_episodes=FLAGS.num_eval_episodes,
         eval_interval=FLAGS.eval_interval,
         eval_only=FLAGS.eval_only,
+        eval_deterministic=FLAGS.eval_deterministic,
         num_parallel_environments_eval=FLAGS.num_parallel_environments_eval,
         model_ids_eval=FLAGS.model_ids_eval,
         train_checkpoint_interval=FLAGS.train_checkpoint_interval,

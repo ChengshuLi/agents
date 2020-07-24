@@ -3,9 +3,11 @@
 algo="sac"
 robot="fetch"
 config_file="../examples/configs/"$robot"_interactive_nav_s2r_mp.yaml"
+# config_file="../examples/configs/"$robot"_interactive_nav_s2r_mp_continuous.yaml"
 lr="3e-4"
 gamma="0.99"
 env_type="ig_s2r"
+# env_type="ig_s2r_baseline"
 
 train_checkpoint_interval="1000"
 policy_checkpoint_interval="1000"
@@ -25,7 +27,8 @@ log_dir="test"
 num_eval_episodes="100"
 env_mode="headless"
 fine_motion_plan="true"
-mp_algo="birrt"  # birrt | lazy_prm
+base_mp_algo="birrt"  # birrt | lazy_prm
+arm_mp_algo="birrt"  # birrt | lazy_prm
 
 ### change default arguments
 while [[ "$#" -gt 0 ]]; do
@@ -42,7 +45,8 @@ while [[ "$#" -gt 0 ]]; do
         --num_eval_episodes) num_eval_episodes="$2"; shift ;;
         --env_mode) env_mode="$2"; shift ;;
         --fine_motion_plan) fine_motion_plan="$2"; shift ;;
-        --mp_algo) mp_algo="$2"; shift ;;
+        --base_mp_algo) base_mp_algo="$2"; shift ;;
+        --arm_mp_algo) arm_mp_algo="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -55,7 +59,8 @@ echo "seed:" $seed
 echo "num_eval_episodes:" $num_eval_episodes
 echo "env_mode:" $env_mode
 echo "fine_motion_plan:" $fine_motion_plan
-echo "mp_algo:" $mp_algo
+echo "base_mp_algo:" $base_mp_algo
+echo "arm_mp_algo:" $arm_mp_algo
 
 python -u train_eval.py \
     --root_dir $log_dir \
@@ -86,7 +91,10 @@ python -u train_eval.py \
     --model_ids $model_ids \
     --model_ids_eval $model_ids_eval \
     --collision_reward_weight $col \
-    --fine_motion_plan $fine_motion_plan \
-    --mp_algo $mp_algo \
+    --fine_motion_plan=$fine_motion_plan \
+    --base_mp_algo $base_mp_algo \
+    --arm_mp_algo $arm_mp_algo \
     --env_mode $env_mode \
     --eval_only
+    # --eval_deterministic \
+    # > $log_dir/log 2>&1
