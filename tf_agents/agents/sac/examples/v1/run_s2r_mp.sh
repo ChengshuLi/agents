@@ -42,13 +42,15 @@ done
 
 log_dir="/result/relmogen_sac_"$arena"_"$seed
 mkdir -p $log_dir
-echo $log_dir
-echo $gpu_c
-echo $gpu_g
-echo $model_ids
-echo $col
-echo $arena
-echo $seed
+echo "log_dir:" $log_dir
+echo "gpu_c:" $gpu_c
+echo "gpu_g:" $gpu_g
+echo "model_ids:" $model_ids
+echo "col:" $col
+echo "arena:" $arena
+echo "seed:" $seed
+echo "num_parallel:" $num_parallel
+echo "finetune:" $finetune
 
 python -u train_eval.py \
     --root_dir $log_dir \
