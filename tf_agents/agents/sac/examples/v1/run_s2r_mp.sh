@@ -21,6 +21,7 @@ col="0.0"
 arena="push_door"
 seed="0"
 num_parallel="16"
+finetune="false"
 
 ### change default arguments
 while [[ "$#" -gt 0 ]]; do
@@ -33,6 +34,7 @@ while [[ "$#" -gt 0 ]]; do
         --arena) arena="$2"; shift ;;
         --seed) seed="$2"; shift ;;
         --num_parallel) num_parallel="$2"; shift ;;
+        --finetune) finetune="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -73,6 +75,7 @@ python -u train_eval.py \
     --critic_learning_rate $lr \
     --alpha_learning_rate $lr \
     --gamma $gamma \
+    --finetune=$finetune \
     --model_ids $model_ids \
     --model_ids_eval $model_ids_eval \
     --collision_reward_weight $col > $log_dir/log 2>&1
