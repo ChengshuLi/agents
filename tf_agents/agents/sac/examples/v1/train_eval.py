@@ -116,6 +116,8 @@ flags.DEFINE_boolean('eval_deterministic', False,
                      'Whether to run evaluation using a deterministic policy')
 flags.DEFINE_integer('gpu_c', 0,
                      'GPU id for compute, e.g. Tensorflow.')
+flags.DEFINE_boolean('finetune', False,
+                     'Whether to finetune from an existing checkpoint')
 
 # Added for Gibson
 flags.DEFINE_string('config_file', None,
@@ -200,6 +202,7 @@ def train_eval(
         gamma=0.99,
         reward_scale_factor=1.0,
         gradient_clipping=None,
+        finetune=False,
         # Params for eval
         num_eval_episodes=30,
         eval_interval=10000,
@@ -407,7 +410,7 @@ def train_eval(
 
         initial_collect_op = dynamic_step_driver.DynamicStepDriver(
             tf_env,
-            initial_collect_policy,
+            collect_policy if finetune else initial_collect_policy,
             observers=replay_observer + train_metrics,
             num_steps=initial_collect_steps * num_parallel_environments).run()
 
@@ -461,6 +464,7 @@ def train_eval(
         with sess.as_default():
             # Initialize graph.
             train_checkpointer.initialize_or_restore(sess)
+            # policy_checkpointer.initialize_or_restore(sess)
 
             if eval_only:
                 metric_utils.compute_summaries(
@@ -495,7 +499,7 @@ def train_eval(
 
             global_step_val = sess.run(global_step)
 
-            if global_step_val == 0:
+            if global_step_val == 0 or finetune:
                 # # Initial eval of randomly initialized policy
                 # metric_utils.compute_summaries(
                 #     eval_metrics,
@@ -658,6 +662,7 @@ def main(_):
         critic_learning_rate=FLAGS.critic_learning_rate,
         alpha_learning_rate=FLAGS.alpha_learning_rate,
         gamma=FLAGS.gamma,
+        finetune=FLAGS.finetune,
         num_eval_episodes=FLAGS.num_eval_episodes,
         eval_interval=FLAGS.eval_interval,
         eval_only=FLAGS.eval_only,
