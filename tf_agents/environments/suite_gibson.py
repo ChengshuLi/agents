@@ -42,6 +42,7 @@ def load(config_file,
          random_height=False,
          gym_env_wrappers=(),
          env_wrappers=(),
+         optimize_iter=0,
          spec_dtype_map=None):
     config_file = os.path.join(os.path.dirname(gibson2.__file__), config_file)
     if env_type == 'gibson':
@@ -74,6 +75,7 @@ def load(config_file,
             fine_motion_plan=fine_motion_plan,
             base_mp_algo=base_mp_algo,
             arm_mp_algo=arm_mp_algo,
+            optimize_iter=optimize_iter,
         )
     elif env_type == 'ig_s2r_baseline':
         env = MotionPlanningBaseArmContinuousEnv(
