@@ -150,6 +150,8 @@ flags.DEFINE_string('base_mp_algo', 'birrt',
                     'Base motion planning algorithm')
 flags.DEFINE_string('arm_mp_algo', 'birrt',
                     'Arm motion planning algorithm')
+flags.DEFINE_integer('optimize_iter', 0,
+                     'Base trajectory optimization iteration (500-2000)')
 
 
 FLAGS = flags.FLAGS
@@ -635,6 +637,7 @@ def main(_):
             fine_motion_plan=FLAGS.fine_motion_plan,
             base_mp_algo=FLAGS.base_mp_algo,
             arm_mp_algo=FLAGS.arm_mp_algo,
+            optimize_iter=FLAGS.optimize_iter,
             env_mode=mode,
             action_timestep=FLAGS.action_timestep,
             physics_timestep=FLAGS.physics_timestep,

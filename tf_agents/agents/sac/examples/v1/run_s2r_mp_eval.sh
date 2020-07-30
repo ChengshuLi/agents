@@ -29,6 +29,7 @@ env_mode="headless"
 fine_motion_plan="true"
 base_mp_algo="birrt"  # birrt | lazy_prm
 arm_mp_algo="birrt"  # birrt | lazy_prm
+optimize_iter="0"
 
 ### change default arguments
 while [[ "$#" -gt 0 ]]; do
@@ -47,6 +48,7 @@ while [[ "$#" -gt 0 ]]; do
         --fine_motion_plan) fine_motion_plan="$2"; shift ;;
         --base_mp_algo) base_mp_algo="$2"; shift ;;
         --arm_mp_algo) arm_mp_algo="$2"; shift ;;
+        --optimize_iter) optimize_iter="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -61,6 +63,7 @@ echo "env_mode:" $env_mode
 echo "fine_motion_plan:" $fine_motion_plan
 echo "base_mp_algo:" $base_mp_algo
 echo "arm_mp_algo:" $arm_mp_algo
+echo "optimize_iter:" $optimize_iter
 
 python -u train_eval.py \
     --root_dir $log_dir \
@@ -94,6 +97,7 @@ python -u train_eval.py \
     --fine_motion_plan=$fine_motion_plan \
     --base_mp_algo $base_mp_algo \
     --arm_mp_algo $arm_mp_algo \
+    --optimize_iter $optimize_iter \
     --env_mode $env_mode \
     --eval_only
     # --eval_deterministic \
