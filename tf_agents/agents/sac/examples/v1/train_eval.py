@@ -466,7 +466,7 @@ def train_eval(
         with sess.as_default():
             # Initialize graph.
             train_checkpointer.initialize_or_restore(sess)
-            # policy_checkpointer.initialize_or_restore(sess)
+            policy_checkpointer.initialize_or_restore(sess)
 
             if eval_only:
                 metric_utils.compute_summaries(

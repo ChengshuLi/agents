@@ -34,6 +34,7 @@ def load(config_file,
          fine_motion_plan=None,
          base_mp_algo='birrt',
          arm_mp_algo='birrt',
+         optimize_iter=0,
          env_mode='headless',
          action_timestep=1.0 / 10.0,
          physics_timestep=1.0 / 40.0,
@@ -74,6 +75,7 @@ def load(config_file,
             fine_motion_plan=fine_motion_plan,
             base_mp_algo=base_mp_algo,
             arm_mp_algo=arm_mp_algo,
+            optimize_iter=optimize_iter,
         )
     elif env_type == 'ig_s2r_baseline':
         env = MotionPlanningBaseArmContinuousEnv(
