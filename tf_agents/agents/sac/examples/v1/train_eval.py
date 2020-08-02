@@ -144,7 +144,7 @@ flags.DEFINE_integer('gpu_g', 0,
                      'GPU id for graphics, e.g. Gibson.')
 flags.DEFINE_boolean('random_position', False,
                      'Whether to randomize initial and target position')
-flags.DEFINE_boolean('fine_motion_plan', True,
+flags.DEFINE_boolean('fine_motion_plan', False,
                      'Whether to use fine motion planning')
 flags.DEFINE_string('base_mp_algo', 'birrt',
                     'Base motion planning algorithm')
