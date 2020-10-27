@@ -18,9 +18,9 @@ import gin
 
 from tf_agents.environments import gym_wrapper
 from tf_agents.environments import wrappers
-from gibson2.envs.locomotor_env import NavigateEnv, NavigateRandomEnv
-from gibson2.envs.motion_planner_env import MotionPlanningBaseArmEnv
-from gibson2.envs.motion_planner_env import MotionPlanningBaseArmContinuousEnv
+#from gibson2.envs.locomotor_env import NavigateEnv, NavigateRandomEnv
+from gibson2.envs.motion_planner_env import MotionPlanningEnv
+#from gibson2.envs.motion_planner_env import MotionPlanningBaseArmContinuousEnv
 import gibson2
 
 
@@ -46,49 +46,57 @@ def load(config_file,
          spec_dtype_map=None):
     config_file = os.path.join(os.path.dirname(gibson2.__file__), config_file)
     if env_type == 'gibson':
-        if random_position:
-            env = NavigateRandomEnv(
-                config_file=config_file,
-                mode=env_mode,
-                action_timestep=action_timestep,
-                physics_timestep=physics_timestep,
-                device_idx=device_idx,
-                random_height=random_height)
-        else:
-            env = NavigateEnv(
-                config_file=config_file,
-                mode=env_mode,
-                action_timestep=action_timestep,
-                physics_timestep=physics_timestep,
-                device_idx=device_idx)
+        #if random_position:
+        #    env = NavigateRandomEnv(
+        #        config_file=config_file,
+        #        mode=env_mode,
+        #        action_timestep=action_timestep,
+        #        physics_timestep=physics_timestep,
+        #        device_idx=device_idx,
+        #        random_height=random_height)
+        #else:
+        #    env = NavigateEnv(
+        #        config_file=config_file,
+        #        mode=env_mode,
+        #        action_timestep=action_timestep,
+        #        physics_timestep=physics_timestep,
+        #        device_idx=device_idx)
+        pass
     elif env_type == 'ig_s2r':
-        env = MotionPlanningBaseArmEnv(
-            config_file=config_file,
-            model_id=model_id,
-            collision_reward_weight=collision_reward_weight,
-            mode=env_mode,
-            action_timestep=1 / 500.0,
-            physics_timestep=1 / 500.0,
-            device_idx=device_idx,
-            arena=arena,
-            log_dir=log_dir,
-            fine_motion_plan=fine_motion_plan,
-            base_mp_algo=base_mp_algo,
-            arm_mp_algo=arm_mp_algo,
-            optimize_iter=optimize_iter,
-        )
+        #env = MotionPlanningBaseArmEnv(
+        #    config_file=config_file,
+        #    model_id=model_id,
+        #    collision_reward_weight=collision_reward_weight,
+        #    mode=env_mode,
+        #    action_timestep=1 / 500.0,
+        #    physics_timestep=1 / 500.0,
+        #    device_idx=device_idx,
+        #    arena=arena,
+        #    log_dir=log_dir,
+        #    fine_motion_plan=fine_motion_plan,
+        #    base_mp_algo=base_mp_algo,
+        #    arm_mp_algo=arm_mp_algo,
+        #    optimize_iter=optimize_iter,
+        #)
+        pass
     elif env_type == 'ig_s2r_baseline':
-        env = MotionPlanningBaseArmContinuousEnv(
+        #env = MotionPlanningBaseArmContinuousEnv(
+        #    config_file=config_file,
+        #    model_id=model_id,
+        #    collision_reward_weight=collision_reward_weight,
+        #    mode=env_mode,
+        #    action_timestep=1 / 10.0,
+        #    physics_timestep=1 / 40.0,
+        #    device_idx=device_idx,
+        #    arena=arena,
+        #    log_dir=log_dir,
+        #)
+        pass
+    elif env_type == 'new_ig':
+        env = MotionPlanningEnv(
             config_file=config_file,
-            model_id=model_id,
-            collision_reward_weight=collision_reward_weight,
             mode=env_mode,
-            action_timestep=1 / 10.0,
-            physics_timestep=1 / 40.0,
-            device_idx=device_idx,
-            arena=arena,
-            log_dir=log_dir,
-        )
+         )
     else:
         assert False, 'unknown env_type: {}'.format(env_type)
 

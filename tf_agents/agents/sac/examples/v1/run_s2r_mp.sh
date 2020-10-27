@@ -2,10 +2,10 @@
 
 algo="sac"
 robot="fetch"
-config_file="../examples/configs/"$robot"_interactive_nav_s2r_mp.yaml"
+config_file="../examples/configs/fetch_push_door_nav.yaml"
 lr="3e-4"
 gamma="0.99"
-env_type="ig_s2r"
+env_type="new_ig"
 
 train_checkpoint_interval="1000"
 policy_checkpoint_interval="1000"
@@ -15,12 +15,12 @@ summary_interval="25"
 
 gpu_c="1"
 gpu_g="0"
-model_ids="Avonia,Avonia,Avonia,candcenter,candcenter,candcenter,gates_jan20,gates_jan20,gates_jan20"
-model_ids_eval="Avonia"
+#model_ids="Avonia,Avonia,Avonia,candcenter,candcenter,candcenter,gates_jan20,gates_jan20,gates_jan20"
+#model_ids_eval="Avonia"
 col="0.0"
 arena="push_door"
 seed="0"
-num_parallel="16"
+num_parallel="8"
 finetune="false"
 
 ### change default arguments
@@ -40,7 +40,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-log_dir="/result/relmogen_sac_"$arena"_"$seed
+log_dir="/result/relmogen_sac_new_ig_"$arena"_"$seed
 mkdir -p $log_dir
 echo "log_dir:" $log_dir
 echo "gpu_c:" $gpu_c
@@ -78,6 +78,6 @@ python -u train_eval.py \
     --alpha_learning_rate $lr \
     --gamma $gamma \
     --finetune=$finetune \
-    --model_ids $model_ids \
-    --model_ids_eval $model_ids_eval \
     --collision_reward_weight $col > $log_dir/log 2>&1
+    #--model_ids $model_ids \
+    #--model_ids_eval $model_ids_eval \
