@@ -312,6 +312,14 @@ def train_eval(
                 fc_layer_params=encoder_fc_layers,
                 kernel_initializer=glorot_uniform_initializer,
             ))
+        
+        if 'pretrain_pred' in observation_spec:
+            preprocessing_layers['pretrain_pred'] = tf.keras.Sequential(mlp_layers(
+                conv_1d_layer_params=None,
+                conv_2d_layer_params=occupancy_grid_conv_2d_layer_params,
+                fc_layer_params=encoder_fc_layers,
+                kernel_initializer=glorot_uniform_initializer,
+            ))
 
         if 'scan' in observation_spec:
             preprocessing_layers['scan'] = tf.keras.Sequential(mlp_layers(
