@@ -43,7 +43,6 @@ def load(config_file,
          random_height=False,
          gym_env_wrappers=(),
          env_wrappers=(),
-         optimize_iter=0,
          spec_dtype_map=None):
     config_file = os.path.join(os.path.dirname(gibson2.__file__), config_file)
     if env_type == 'gibson':
